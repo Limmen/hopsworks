@@ -35,6 +35,8 @@ angular.module('hopsWorksApp')
             self.schema ="Not fetched";
             self.code = ""
             self.table = []
+            console.log("featuregroup:")
+            console.log(featuregroup)
 
             /**
              * Get the API code to retrieve the featuregroup
@@ -110,6 +112,8 @@ angular.module('hopsWorksApp')
                 self.table.push({"property": "HDFS path", "value": self.featuregroup.hdfsStorePaths[0]})
                 self.table.push({"property": "Creator", "value": self.featuregroup.creator})
                 self.table.push({"property": "Created", "value": self.formatDate(self.featuregroup.created)})
+                self.table.push({"property": "Hudi", "value": self.featuregroup.hudi})
+                self.table.push({"property": "Hive table type", "value": self.featuregroup.hiveTableType})
                 self.table.push({"property": "API Retrieval Code", "value": self.code})
             };
 

@@ -277,7 +277,8 @@ public class FeaturestoreService {
           featuregroupJsonDTO.getName(), featureStr,
           featuregroupJsonDTO.getDependencies(), job, featuregroupJsonDTO.getVersion(),
           featuregroupJsonDTO.getFeatureCorrelationMatrix(), featuregroupJsonDTO.getDescriptiveStatistics(),
-          featuregroupJsonDTO.getFeaturesHistogram(), featuregroupJsonDTO.getClusterAnalysis());
+          featuregroupJsonDTO.getFeaturesHistogram(), featuregroupJsonDTO.getClusterAnalysis(),
+        featuregroupJsonDTO.getCreateTableSql());
       activityFacade.persistActivity(ActivityFacade.CREATED_FEATUREGROUP + featuregroupDTO.getName(),
           project, user, ActivityFlag.SERVICE);
       GenericEntity<FeaturegroupDTO> featuregroupGeneric =
@@ -526,6 +527,18 @@ public class FeaturestoreService {
     //Verify that the user has the data-owner role or is the creator of the featuregroup
     FeaturegroupDTO oldFeaturegroupDTO = featuregroupController.getFeaturegroupWithIdAndFeaturestore(featurestore,
       featuregroupId);
+    String createTableSql = null;
+    if(oldFeaturegroupDTO.isHudi()){
+      RowValueQueryResult schema = null;
+      try {
+        schema = featuregroupController.getSchema(oldFeaturegroupDTO, project, user, featurestore);
+        createTableSql = schema.toString();
+      } catch (SQLException e) {
+        throw new FeaturestoreException(RESTCodes.FeaturestoreErrorCode.COULD_NOT_CLEAR_FEATUREGROUP, Level.SEVERE,
+          "project: " + project.getName() + ", featurestoreId: " + featurestoreId +
+            ", featuregroupId: " + featuregroupId, e.getMessage(), e);
+      }
+    }
     verifyUserRole(oldFeaturegroupDTO, featurestore, user);
     Jobs job = null;
     if (oldFeaturegroupDTO.getJobId() != null)
@@ -547,7 +560,7 @@ public class FeaturestoreService {
           oldFeaturegroupDTO.getName(), featureStr, dependencies,
           job, oldFeaturegroupDTO.getVersion(), oldFeaturegroupDTO.getFeatureCorrelationMatrix(),
           oldFeaturegroupDTO.getDescriptiveStatistics(), oldFeaturegroupDTO.getFeaturesHistogram(),
-          oldFeaturegroupDTO.getClusterAnalysis());
+          oldFeaturegroupDTO.getClusterAnalysis(),createTableSql);
       GenericEntity<FeaturegroupDTO> featuregroupGeneric =
           new GenericEntity<FeaturegroupDTO>(newFeaturegroupDTO) {};
       return noCacheResponse.getNoCacheResponseBuilder(Response.Status.OK).entity(featuregroupGeneric).build();

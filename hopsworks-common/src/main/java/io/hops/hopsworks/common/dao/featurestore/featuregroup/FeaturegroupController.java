@@ -33,6 +33,7 @@ import io.hops.hopsworks.common.dao.jobs.description.Jobs;
 import io.hops.hopsworks.common.dao.project.Project;
 import io.hops.hopsworks.common.dao.user.Users;
 import io.hops.hopsworks.common.hdfs.HdfsUsersController;
+import io.hops.hopsworks.common.hive.HiveTableType;
 import io.hops.hopsworks.common.security.CertificateMaterializer;
 import io.hops.hopsworks.common.util.Settings;
 import io.hops.hopsworks.exceptions.CryptoPasswordNotFoundException;
@@ -40,6 +41,7 @@ import io.hops.hopsworks.exceptions.FeaturestoreException;
 import io.hops.hopsworks.exceptions.HopsSecurityException;
 import io.hops.hopsworks.restutils.RESTCodes;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.parquet.Strings;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -206,6 +208,13 @@ public class FeaturegroupController {
     Long inodeId = featuregroupFacade.getFeaturegroupInodeId(featuregroup.getHiveTblId());
     featuregroupDTO.setInodeId(inodeId);
     featuregroupDTO.setDependencies((List) featuregroup.getDependencies(), inodeFacade);
+    HiveTableType hiveTableType = featuregroupFacade.getHiveTableType(featuregroup.getHiveTblId());
+    featuregroupDTO.setHiveTableType(hiveTableType);
+    String hiveInputFormat = featuregroupFacade.getHiveInputFormat(featuregroup.getHiveTblId());
+    featuregroupDTO.setInputFormat(hiveInputFormat);
+    if(hiveInputFormat.equalsIgnoreCase(Settings.HOPS_FEATURESTORE_HOODIE_INPUT_FORMAT)){
+      featuregroupDTO.setHudi(true);
+    }
     return featuregroupDTO;
   }
 
@@ -250,6 +259,9 @@ public class FeaturegroupController {
    * @param descriptiveStatistics    descriptive statistics data
    * @param featuresHistogram        feature distributions data
    * @param clusterAnalysis          cluster analysis JSON
+   * @param createTableSql           SQL string for creating the Hive Table, if not provided the SQL string will be
+   *                                 built manually.
+   *
    * @return                         a DTO representing the created featuregroup
    * @throws FeaturestoreException
    * @throws HopsSecurityException
@@ -262,14 +274,19 @@ public class FeaturegroupController {
       List<String> dependencies, Jobs job, Integer version,
       FeatureCorrelationMatrixDTO featureCorrelationMatrix, DescriptiveStatsDTO descriptiveStatistics,
       FeatureDistributionsDTO featuresHistogram,
-      ClusterAnalysisDTO clusterAnalysis)
+      ClusterAnalysisDTO clusterAnalysis, String createTableSql)
       throws SQLException, FeaturestoreException, HopsSecurityException {
     //Create Hive Table
     String db = featurestoreController.getFeaturestoreDbName(featurestore.getProject());
     String tableName = getTblName(featuregroupName, version);
-    String query = "CREATE TABLE " + db + ".`" + tableName + "` " +
+    String query = "";
+    if(Strings.isNullOrEmpty(createTableSql)){
+      query = "CREATE TABLE " + db + ".`" + tableName + "` " +
         features + " STORED AS " +
         settings.getFeaturestoreDbDefaultStorageFormat();
+    } else {
+      query = createTableSql;
+    }
     executeUpdateHiveQuery(query, db, project, user);
     String hdfsUsername = hdfsUsersController.getHdfsUserName(project, user);
 

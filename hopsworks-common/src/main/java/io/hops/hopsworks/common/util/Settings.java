@@ -284,10 +284,6 @@ public class Settings implements Serializable {
    * -------------------- Serving ---------------
    */
   private static final String VARIABLE_SERVING_MONITOR_INT = "serving_monitor_int";
-
-  /*
-   * -------------------- Serving ---------------
-   */
   private static final String VARIABLE_SERVING_CONNECTION_POOL_SIZE = "serving_connection_pool_size";
   private static final String VARIABLE_SERVING_MAX_ROUTE_CONNECTIONS = "serving_max_route_connections";
 
@@ -1219,6 +1215,7 @@ public class Settings implements Serializable {
   public static final String HOPS_FEATURESTORE_TOUR_JOB_CLASS = "io.hops.examples.featurestore.Main";
   public static final String HOPS_FEATURESTORE_TOUR_JOB_NAME = "featurestore_tour_job";
   public static final String HOPS_FEATURESTORE_TOUR_JOB_INPUT_PARAM = "--input ";
+  public static final String HOPS_FEATURESTORE_HOODIE_INPUT_FORMAT = "com.uber.hoodie.hadoop.HoodieInputFormat";
 
   //Serving constants
   public static final String INFERENCE_SCHEMANAME = "inferenceschema";

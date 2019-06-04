@@ -22,6 +22,7 @@ import io.hops.hopsworks.common.dao.featurestore.stats.desc_stats.DescriptiveSta
 import io.hops.hopsworks.common.dao.featurestore.stats.feature_correlation.FeatureCorrelationMatrixDTO;
 import io.hops.hopsworks.common.dao.featurestore.stats.feature_distributions.FeatureDistributionsDTO;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
@@ -30,6 +31,8 @@ import java.util.List;
  */
 @XmlRootElement
 public class FeaturegroupJsonDTO extends FeaturestoreEntityJsonDTO {
+  
+  private String createTableSql = null;
 
   public FeaturegroupJsonDTO() {
     super(null, null, null, null,
@@ -43,8 +46,18 @@ public class FeaturegroupJsonDTO extends FeaturestoreEntityJsonDTO {
       FeatureCorrelationMatrixDTO featureCorrelationMatrix, DescriptiveStatsDTO descriptiveStatistics,
       boolean updateMetadata,
       boolean updateStats, FeatureDistributionsDTO featuresHistogram, ClusterAnalysisDTO clusterAnalysis,
-      String jobName) {
+      String jobName, String createTableSql) {
     super(description, dependencies, version, featuregroupName, featureCorrelationMatrix, descriptiveStatistics,
         featuresHistogram, clusterAnalysis, updateMetadata, updateStats, features, jobName);
+    this.createTableSql = createTableSql;
+  }
+  
+  @XmlElement
+  public String getCreateTableSql() {
+    return createTableSql;
+  }
+  
+  public void setCreateTableSql(String createTableSql) {
+    this.createTableSql = createTableSql;
   }
 }

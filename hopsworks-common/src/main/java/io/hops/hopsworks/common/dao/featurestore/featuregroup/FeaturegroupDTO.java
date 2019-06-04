@@ -17,6 +17,7 @@
 package io.hops.hopsworks.common.dao.featurestore.featuregroup;
 
 import io.hops.hopsworks.common.dao.featurestore.FeaturestoreEntityDTO;
+import io.hops.hopsworks.common.hive.HiveTableType;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,6 +31,9 @@ import java.util.List;
 public class FeaturegroupDTO extends FeaturestoreEntityDTO {
 
   private List<String> hdfsStorePaths;
+  private boolean hudi = false;
+  private String inputFormat;
+  private HiveTableType hiveTableType;
 
   public FeaturegroupDTO() {
     super(null, null, null, null, null, null,
@@ -42,6 +46,9 @@ public class FeaturegroupDTO extends FeaturestoreEntityDTO {
         (List) featuregroup.getStatistics(), featuregroup.getJob(),
         featuregroup.getId());
     this.hdfsStorePaths = null;
+    this.hudi = false;
+    this.inputFormat = null;
+    this.hiveTableType = null;
   }
 
   @XmlElement
@@ -53,12 +60,41 @@ public class FeaturegroupDTO extends FeaturestoreEntityDTO {
   public void setHdfsStorePaths(List<String> hdfsStorePaths) {
     this.hdfsStorePaths = hdfsStorePaths;
   }
-
+  
+  @XmlElement
+  public boolean isHudi() {
+    return hudi;
+  }
+  
+  public void setHudi(boolean hudi) {
+    this.hudi = hudi;
+  }
+  
+  @XmlElement
+  public String getInputFormat() {
+    return inputFormat;
+  }
+  
+  public void setInputFormat(String inputFormat) {
+    this.inputFormat = inputFormat;
+  }
+  
+  @XmlElement
+  public HiveTableType getHiveTableType() {
+    return hiveTableType;
+  }
+  
+  public void setHiveTableType(HiveTableType hiveTableType) {
+    this.hiveTableType = hiveTableType;
+  }
+  
   @Override
   public String toString() {
     return "FeaturegroupDTO{" +
-        ", hdfsStorePaths=" + hdfsStorePaths +
-        '}';
+      "hdfsStorePaths=" + hdfsStorePaths +
+      ", hudi=" + hudi +
+      ", inputFormat='" + inputFormat + '\'' +
+      ", hiveTableType=" + hiveTableType +
+      '}';
   }
-
 }
