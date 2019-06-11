@@ -1216,6 +1216,7 @@ public class Settings implements Serializable {
   public static final String HOPS_FEATURESTORE_TOUR_JOB_NAME = "featurestore_tour_job";
   public static final String HOPS_FEATURESTORE_TOUR_JOB_INPUT_PARAM = "--input ";
   public static final String HOPS_FEATURESTORE_HOODIE_INPUT_FORMAT = "com.uber.hoodie.hadoop.HoodieInputFormat";
+  public static final String HOPS_FEATURESTORE_HOODIE_PRIMARY_KEY = "_hoodie_record_key";
 
   //Serving constants
   public static final String INFERENCE_SCHEMANAME = "inferenceschema";

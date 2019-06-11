@@ -189,10 +189,22 @@ public class FeaturegroupController {
    */
   private FeaturegroupDTO convertFeaturegrouptoDTO(Featuregroup featuregroup) {
     FeaturegroupDTO featuregroupDTO = new FeaturegroupDTO(featuregroup);
+    HiveTableType hiveTableType = featuregroupFacade.getHiveTableType(featuregroup.getHiveTblId());
+    featuregroupDTO.setHiveTableType(hiveTableType);
+    String hiveInputFormat = featuregroupFacade.getHiveInputFormat(featuregroup.getHiveTblId());
+    featuregroupDTO.setInputFormat(hiveInputFormat);
+    if(hiveInputFormat.equalsIgnoreCase(Settings.HOPS_FEATURESTORE_HOODIE_INPUT_FORMAT)){
+      featuregroupDTO.setHudi(true);
+    }
     List<FeatureDTO> featureDTOs = featuregroupFacade.getHiveFeatures(featuregroup.getHiveTblId());
-    String primaryKeyName = featuregroupFacade.getHiveTablePrimaryKey(featuregroup.getHiveTblId());
-    featureDTOs.stream().filter(f -> f.getName().equals(primaryKeyName))
+    if(!featuregroupDTO.isHudi()) {
+      String primaryKeyName = featuregroupFacade.getHiveTablePrimaryKey(featuregroup.getHiveTblId());
+      featureDTOs.stream().filter(f -> f.getName().equals(primaryKeyName))
         .collect(Collectors.toList()).get(0).setPrimary(true);
+    } else {
+      featureDTOs.stream().filter(f -> f.getName().equals(Settings.HOPS_FEATURESTORE_HOODIE_PRIMARY_KEY))
+        .collect(Collectors.toList()).get(0).setPrimary(true);
+    }
     featuregroupDTO.setFeatures(featureDTOs);
     String featuregroupName = featuregroupFacade.getHiveTableName(featuregroup.getHiveTblId());
     int versionLength = featuregroup.getVersion().toString().length();
@@ -208,13 +220,6 @@ public class FeaturegroupController {
     Long inodeId = featuregroupFacade.getFeaturegroupInodeId(featuregroup.getHiveTblId());
     featuregroupDTO.setInodeId(inodeId);
     featuregroupDTO.setDependencies((List) featuregroup.getDependencies(), inodeFacade);
-    HiveTableType hiveTableType = featuregroupFacade.getHiveTableType(featuregroup.getHiveTblId());
-    featuregroupDTO.setHiveTableType(hiveTableType);
-    String hiveInputFormat = featuregroupFacade.getHiveInputFormat(featuregroup.getHiveTblId());
-    featuregroupDTO.setInputFormat(hiveInputFormat);
-    if(hiveInputFormat.equalsIgnoreCase(Settings.HOPS_FEATURESTORE_HOODIE_INPUT_FORMAT)){
-      featuregroupDTO.setHudi(true);
-    }
     return featuregroupDTO;
   }
 
