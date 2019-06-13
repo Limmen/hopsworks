@@ -35,36 +35,50 @@ angular.module('hopsWorksApp')
             self.features = [];
             self.trainingDatasets = [];
             self.featuregroups = [];
-            self.showFeaturesBool = -1;
-            self.showFeaturegroupsBool = 1;
-            self.showTrainingDatasetsBool = -1;
             self.jobs = [];
             self.pageSize = 10;
-            self.featureSortKey = 'name';
-            self.featuregroupSortKey = 'name';
-            self.trainingDatasetSortKey = 'name';
+            self.currentPage = 1;
+            self.featurestore;
+            self.featureSearchQuery = "";
+            self.featurestoreEntitySortKey = 'name';
+            self.featuresSortKey = 'name';
             self.reverse = false;
-            self.fgFilter = "";
-            self.fFilter = "";
-            self.dFilter = "";
+            self.featuresReverse = false;
+            self.fseFilter = "";
             self.firstPull = false;
             self.featuregroupsDictList = [];
             self.trainingDatasetsDictList = [];
+            self.featurestoreEntitiesDictList = [];
             self.loading = false;
             self.loadingText = "";
             self.featuregroupsLoaded = false;
             self.trainingDatasetsLoaded = false;
             self.tourService = TourService;
             self.tourService.currentStep_TourNine = 0; //Feature store tour
+            self.featureSearchResult = null;
+            self.featureSearchResultFeaturegroups = []
+            self.selectedSearchFeaturegroup;
 
             /**
-             * Called when clicking the sort-arrow in the UI
+             * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
              *
              * @param keyname
              */
             self.sort = function (keyname) {
                 self.sortKey = keyname;   //set the sortKey to the param passed
+                self.featurestoreEntitySortKey = keyname
                 self.reverse = !self.reverse; //if true make it false and vice versa
+            };
+
+            /**
+             * Called when clicking the sort-arrow in the UI of features table
+             *
+             * @param keyname
+             */
+            self.sortFeature = function (keyname) {
+                self.sortKey = keyname;   //set the sortKey to the param passed
+                self.featuresSortKey = keyname;
+                self.featuresReverse = !self.featuresReverse; //if true make it false and vice versa
             };
 
             /**
@@ -78,6 +92,15 @@ angular.module('hopsWorksApp')
             };
 
             /**
+             * Function to get the current index in a paginated table
+             *
+             * @param pageIndex the index in the current page
+             */
+            self.getTotalIndex = function (pageIndex) {
+                return ((self.currentPage-1)*self.pageSize) + pageIndex + 1
+            };
+
+            /**
              * Function to stop the loading screen
              */
             self.stopLoading = function () {
@@ -88,13 +111,76 @@ angular.module('hopsWorksApp')
             };
 
             /**
+             * Search for a feature name
+             */
+            self.featureSearch = function (searchQuery) {
+                self.featureSearchResultFeaturegroups = []
+                self.featureSearchResultFeatures = []
+                for (var i = 0; i < self.features.length; i++) {
+                    if(self.features[i].name == searchQuery) {
+                        var fg = {
+                            "name": self.features[i].featuregroup,
+                            "longName": self.getFeaturegroupSelectName(self.features[i].featuregroup, self.features[i].version),
+                            "featuregroup": self.getFeaturegroupByNameAndVersion(self.features[i].featuregroup, self.features[i].version)
+                        }
+                        self.featureSearchResultFeaturegroups.push(fg)
+                        self.featureSearchResultFeatures.push(self.features[i])
+                    }
+                }
+                if(self.featureSearchResultFeatures.length == 0) {
+                    self.featureSearchResult = "Feature '" + searchQuery + "' not found.";
+                } else {
+                    self.featureSearchResult = self.featureSearchResultFeatures[0]
+                    self.selectedSearchFeaturegroup = self.featureSearchResultFeaturegroups[0]
+                }
+            };
+
+            /**
+             * Check whether there exists multiple search results
+             * @returns {boolean}
+             */
+            self.hasMultipleSearchResults = function () {
+                return self.hasFeatureSearchResult() && self.featureSearchResultFeaturegroups.length > 1
+            };
+
+            /**
+             * Reset feature search result
+             */
+            self.resetFeatureSearchResult = function () {
+                self.featureSearchResult = null
+            };
+
+            /**
+             * Check whether feature search result is available
+             */
+            self.hasFeatureSearchResult = function () {
+                if(!self.featureSearchResult || self.featureSearchResult == undefined || self.featureSearchResult == null) {
+                    return false
+                } else {
+                    return true
+                }
+            };
+
+            /**
+             * Check whether feature search result is "not found"
+             */
+            self.featureSearchResultIsNotFound = function () {
+                if(self.hasFeatureSearchResult() && typeof self.featureSearchResult === 'string' &&
+                    self.featureSearchResult.includes("not found")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            };
+
+            /**
              * Shows the Modal for creating new feature groups through the UI
              */
             self.showCreateFeaturegroupForm = function () {
-                ModalService.createFeaturegroup('lg', self.projectId, $scope.selected.value, self.jobs, self.featuregroups)
+                ModalService.createFeaturegroup('lg', self.projectId, self.featurestore, self.jobs, self.featuregroups)
                     .then(
                         function (success) {
-                            self.getFeaturegroups($scope.selected.value)
+                            self.getFeaturegroups(self.featurestore)
                         }, function (error) {
                             //The user changed their mind.
                         });
@@ -104,11 +190,10 @@ angular.module('hopsWorksApp')
              * Shows the Modal for creating new training datasets through the UI
              */
             self.showCreateTrainingDatasetForm = function () {
-                ModalService.createTrainingDataset('lg', self.projectId, $scope.selected.value, self.jobs, self.trainingDatasets)
+                ModalService.createTrainingDataset('lg', self.projectId, self.featurestore, self.jobs, self.trainingDatasets)
                     .then(
                         function (success) {
-                            self.showTrainingDatasets()
-                            self.getTrainingDatasets($scope.selected.value)
+                            self.getTrainingDatasets(self.featurestore)
                         }, function (error) {
                         });
             };
@@ -120,10 +205,10 @@ angular.module('hopsWorksApp')
                 FeaturestoreService.getFeaturestores(self.projectId).then(
                     function (success) {
                         self.featurestores = success.data;
+                        self.featurestore = self.featurestores[0];
                         if (!self.firstPull) {
-                            $scope.selected = {value: self.featurestores[0]};
-                            self.getTrainingDatasets($scope.selected.value);
-                            self.getFeaturegroups($scope.selected.value);
+                            self.getTrainingDatasets(self.featurestore);
+                            self.getFeaturegroups(self.featurestore);
                             self.firstPull = true
                         }
                     },
@@ -142,14 +227,12 @@ angular.module('hopsWorksApp')
              * @param featuregroup
              */
             self.updateFeaturegroup = function (featuregroup) {
-                ModalService.updateFeaturegroup('lg', self.projectId, featuregroup, $scope.selected.value, self.jobs, self.trainingDatasets)
+                ModalService.updateFeaturegroup('lg', self.projectId, featuregroup, self.featurestore, self.jobs, self.trainingDatasets)
                     .then(
                         function (success) {
-                            self.getFeaturegroups($scope.selected.value);
-                            self.showFeaturegroups();
+                            self.getFeaturegroups(self.featurestore);
                         }, function (error) {
 
-                            self.showFeaturegroups()
                         });
             };
 
@@ -160,13 +243,11 @@ angular.module('hopsWorksApp')
              */
             self.updateTrainingDataset = function (trainingDataset) {
                 ModalService.updateTrainingDataset('lg', self.projectId, trainingDataset,
-                    $scope.selected.value, self.jobs, self.trainingDatasets)
+                    self.featurestore, self.jobs, self.trainingDatasets)
                     .then(
                         function (success) {
-                            self.getTrainingDatasets($scope.selected.value);
-                            self.showTrainingDatasets()
+                            self.getTrainingDatasets(self.featurestore);
                         }, function (error) {
-                            self.showTrainingDatasets()
                         });
             };
 
@@ -180,9 +261,9 @@ angular.module('hopsWorksApp')
                     'Are you sure that you want to delete this version of the feature group? ' +
                     'this action will delete all the data in the feature group with the selected version')
                     .then(function (success) {
-                        FeaturestoreService.deleteFeaturegroup(self.projectId, $scope.selected.value, featuregroup.id).then(
+                        FeaturestoreService.deleteFeaturegroup(self.projectId, self.featurestore, featuregroup.id).then(
                             function (success) {
-                                self.getFeaturegroups($scope.selected.value);
+                                self.getFeaturegroups(self.featurestore);
                                 growl.success("Feature group deleted", {title: 'Success', ttl: 1000});
                             },
                             function (error) {
@@ -207,9 +288,9 @@ angular.module('hopsWorksApp')
                     'Are you sure that you want to delete this version of the training dataset? ' +
                     'this action will delete all the data in the training dataset of this version together with its metadata')
                     .then(function (success) {
-                        FeaturestoreService.deleteTrainingDataset(self.projectId, $scope.selected.value, trainingDataset.id).then(
+                        FeaturestoreService.deleteTrainingDataset(self.projectId, self.featurestore, trainingDataset.id).then(
                             function (success) {
-                                self.getTrainingDatasets($scope.selected.value)
+                                self.getTrainingDatasets(self.featurestore)
                                 growl.success("Training Dataset deleted", {title: 'Success', ttl: 1000});
                             },
                             function (error) {
@@ -237,17 +318,15 @@ angular.module('hopsWorksApp')
                     if (versions[i] > maxVersion)
                         maxVersion = versions[i]
                 }
-                ModalService.createNewFeaturegroupVersion('lg', self.projectId, featuregroups[maxVersion], $scope.selected.value, self.jobs, self.featuregroups)
+                ModalService.createNewFeaturegroupVersion('lg', self.projectId, featuregroups[maxVersion], self.featurestore, self.jobs, self.featuregroups)
                     .then(
                         function (success) {
-                            self.getFeaturegroups($scope.selected.value);
-                            self.showFeaturegroups()
+                            self.getFeaturegroups(self.featurestore);
                         }, function (error) {
                             growl.error(error.data.errorMsg, {
                                 title: 'Failed to create a new version of the feature group',
                                 ttl: 15000
                             });
-                            self.showFeaturegroups()
                         });
             };
 
@@ -264,17 +343,15 @@ angular.module('hopsWorksApp')
                     if (versions[i] > maxVersion)
                         maxVersion = versions[i]
                 }
-                ModalService.createNewTrainingDatasetVersion('lg', self.projectId, trainingDatasets[maxVersion], $scope.selected.value, self.jobs, self.trainingDatasets)
+                ModalService.createNewTrainingDatasetVersion('lg', self.projectId, trainingDatasets[maxVersion], self.featurestore, self.jobs, self.trainingDatasets)
                     .then(
                         function (success) {
-                            self.getTrainingDatasets($scope.selected.value);
-                            self.showTrainingDatasets()
+                            self.getTrainingDatasets(self.featurestore);
                         }, function (error) {
                             growl.error(error.data.errorMsg, {
                                 title: 'Failed to create a new version of the training dataset',
                                 ttl: 15000
                             });
-                            self.showTrainingDatasets()
                         });
             };
 
@@ -288,9 +365,9 @@ angular.module('hopsWorksApp')
                     'Are you sure that you want to delete the contents of this feature group? ' +
                     'If you want to keep the contents and write new data you can create a new version of the same feature group.')
                     .then(function (success) {
-                        FeaturestoreService.clearFeaturegroupContents(self.projectId, $scope.selected.value, featuregroup).then(
+                        FeaturestoreService.clearFeaturegroupContents(self.projectId, self.featurestore, featuregroup).then(
                             function (success) {
-                                self.getFeaturegroups($scope.selected.value);
+                                self.getFeaturegroups(self.featurestore);
                                 growl.success("Feature group contents cleared", {title: 'Success', ttl: 1000});
                             },
                             function (error) {
@@ -314,37 +391,7 @@ angular.module('hopsWorksApp')
             self.viewFeaturegroupStatistics = function (featuregroup) {
                 ModalService.viewFeaturegroupStatistics('lg', self.projectId, featuregroup).then(
                     function (success) {
-                        self.showFeaturegroups()
                     }, function (error) {
-                        self.showFeaturegroups()
-                    });
-            };
-
-            /**
-             * Called when the view-featuregroup-dependencies button is pressed
-             *
-             * @param featuregroup
-             */
-            self.viewFeaturegroupDependencies = function (featuregroup) {
-                ModalService.viewFeaturegroupDependencies('lg', self.projectId, featuregroup).then(
-                    function (success) {
-                        self.showFeaturegroups()
-                    }, function (error) {
-                        self.showFeaturegroups()
-                    });
-            };
-
-            /**
-             * Called when the view-training dataset-dependencies button is pressed
-             *
-             * @param trainingDataset dataset
-             */
-            self.viewTrainingDatasetDependencies = function (trainingDataset) {
-                ModalService.viewTrainingDatasetDependencies('lg', self.projectId, trainingDataset).then(
-                    function (success) {
-                        self.showTrainingDatasets()
-                    }, function (error) {
-                        self.showTrainingDatasets()
                     });
             };
 
@@ -356,9 +403,7 @@ angular.module('hopsWorksApp')
             self.viewTrainingDatasetStatistics = function (trainingDataset) {
                 ModalService.viewTrainingDatasetStatistics('lg', self.projectId, trainingDataset).then(
                     function (success) {
-                        self.showTrainingDatasets()
                     }, function (error) {
-                        self.showTrainingDatasets()
                     });
             };
 
@@ -389,7 +434,6 @@ angular.module('hopsWorksApp')
                     function (success) {
                         self.featuregroups = success.data;
                         self.groupFeaturegroupsByVersion();
-                        self.checkFreshnessOfFeaturegroups();
                         self.collectAllFeatures();
                         self.featuregroupsLoaded = true;
                         self.stopLoading()
@@ -414,7 +458,6 @@ angular.module('hopsWorksApp')
                 FeaturestoreService.getTrainingDatasets(self.projectId, featurestore).then(
                     function (success) {
                         self.trainingDatasets = success.data;
-                        self.checkFreshnessOfTrainingDatasets();
                         self.groupTrainingDatasetsByVersion();
                         self.trainingDatasetsLoaded = true;
                         self.stopLoading()
@@ -446,94 +489,13 @@ angular.module('hopsWorksApp')
                             description: self.featuregroups[i].features[j].description,
                             primary: self.featuregroups[i].features[j].primary,
                             featuregroup: self.featuregroups[i].name,
-                            version: self.featuregroups[i].version
+                            version: self.featuregroups[i].version,
+                            idx: i + 1
                         })
                     }
                     featuresTemp = featuresTemp.concat(fgFeatures)
                 }
                 self.features = featuresTemp;
-            };
-
-            /**
-             * Goes through the list of featuregrup and analyzes associated jobs and dependencies to check
-             * if featuregroups are up-to-date featuregroup stale.
-             */
-            self.checkFreshnessOfFeaturegroups = function () {
-                var i;
-                var j;
-                for (i = 0; i < self.featuregroups.length; i++) {
-                    var outOfDate = false;
-                    var outOfDateReason = "Featuregroup is out-of-date:";
-                    if (self.featuregroups[i].lastComputed !== null) {
-                        var lastComputed = Date.parse(self.featuregroups[i].lastComputed);
-                        var jobStatus = self.featuregroups[i].jobStatus
-                    } else {
-                        lastComputed = -1
-                    }
-                    for (j = 0; j < self.featuregroups[i].dependencies.length; j++) {
-                        var dependencyModificationDate = Date.parse(self.featuregroups[i].dependencies[j].modification);
-                        if ((dependencyModificationDate > lastComputed || jobStatus !== 'Succeeded') && self.featuregroups[i].jobId !== null) {
-                            outOfDate = true;
-                            if (jobStatus === 'Succeeded') {
-                                outOfDateReason = outOfDateReason
-                                    + " dataset dependency: "
-                                    + self.featuregroups[i].dependencies[j].path
-                                    + " was modified at: "
-                                    + self.featuregroups[i].dependencies[j].modification
-                                    + ", which is after the last successful job execution: " + Date.parse(self.featuregroups[i]).lastComputed
-                            } else {
-                                var jobFailedstr = " the last feature engineering job did not complete successfully.";
-                                if (outOfDateReason.indexOf(jobFailedstr) === -1) {
-                                    outOfDateReason = outOfDateReason
-                                        + jobFailedstr
-                                }
-                            }
-                        }
-                    }
-                    self.featuregroups[i].outOfDate = outOfDate;
-                    self.featuregroups[i].outOfDateReason = outOfDateReason
-                }
-            };
-
-            /**
-             * Goes through the list of Training Datasets and analyzes associated jobs and dependencies to check
-             * if training datasets are up-to-date or stale.
-             */
-            self.checkFreshnessOfTrainingDatasets = function () {
-                var i;
-                var j;
-                for (i = 0; i < self.trainingDatasets.length; i++) {
-                    var outOfDate = false;
-                    var outOfDateReason = "Training Dataset is out-of-date:";
-                    if (self.trainingDatasets[i].lastComputed !== null) {
-                        var lastComputed = Date.parse(self.trainingDatasets[i].lastComputed);
-                        var jobStatus = self.trainingDatasets[i].jobStatus
-                    } else {
-                        lastComputed = -1
-                    }
-                    for (j = 0; j < self.trainingDatasets[i].dependencies.length; j++) {
-                        var dependencyModificationDate = Date.parse(self.trainingDatasets[i].dependencies[j].modification);
-                        if ((dependencyModificationDate > lastComputed || jobStatus !== 'Succeeded') && self.trainingDatasets[i].jobId !== null) {
-                            outOfDate = true;
-                            if (jobStatus === 'Succeeded') {
-                                outOfDateReason = outOfDateReason
-                                    + " dataset dependency: "
-                                    + self.trainingDatasets[i].dependencies[j].path
-                                    + " was modified at: "
-                                    + self.trainingDatasets[i].dependencies[j].modification
-                                    + ", which is after the last successful job execution: " + Date.parse(self.trainingDatasets[i]).lastComputed
-                            } else {
-                                var jobFailedstr = " the last feature engineering job did not complete successfully.";
-                                if (outOfDateReason.indexOf(jobFailedstr) === -1) {
-                                    outOfDateReason = outOfDateReason
-                                        + jobFailedstr
-                                }
-                            }
-                        }
-                    }
-                    self.trainingDatasets[i].outOfDate = outOfDate;
-                    self.trainingDatasets[i].outOfDateReason = outOfDateReason
-                }
             };
 
             /**
@@ -562,9 +524,11 @@ angular.module('hopsWorksApp')
                     var versions = Object.keys(item.versionToGroups);
                     item.versions = versions;
                     item.activeVersion = versions[versions.length - 1];
+                    item.type = "Feature Group"
                     dictList.push(item);
                 }
                 self.featuregroupsDictList = dictList
+                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
 
             /**
@@ -593,36 +557,11 @@ angular.module('hopsWorksApp')
                     var versions = Object.keys(item.versionToGroups);
                     item.versions = versions;
                     item.activeVersion = versions[versions.length - 1];
+                    item.type = "Training Dataset"
                     dictList.push(item);
                 }
                 self.trainingDatasetsDictList = dictList
-            };
-
-            /**
-             * Called when the "features" tab is pressed in the UI
-             */
-            self.showFeatures = function () {
-                self.showFeaturegroupsBool = -1;
-                self.showTrainingDatasetsBool = -1;
-                self.showFeaturesBool = 1;
-            };
-
-            /**
-             * Called when the "featuresGroups" tab is pressed in the UI
-             */
-            self.showFeaturegroups = function () {
-                self.showFeaturesBool = -1;
-                self.showTrainingDatasetsBool = -1;
-                self.showFeaturegroupsBool = 1;
-            };
-
-            /**
-             * Called when the "Training Datasets" tab is pressed in the UI
-             */
-            self.showTrainingDatasets = function () {
-                self.showFeaturesBool = -1;
-                self.showFeaturegroupsBool = -1;
-                self.showTrainingDatasetsBool = 1;
+                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
 
             /**
@@ -633,9 +572,7 @@ angular.module('hopsWorksApp')
             self.viewSchemaContent = function (featuregroup) {
                 ModalService.viewFeatureSchemaContent('lg', self.projectId, featuregroup).then(
                     function (success) {
-                        self.showFeaturegroups()
                     }, function (error) {
-                        self.showFeaturegroups()
                     });
             };
 
@@ -647,23 +584,10 @@ angular.module('hopsWorksApp')
             self.viewTrainingDatasetSchemaContent = function (trainingDataset) {
                 ModalService.viewTrainingDatasetSchemaContent('lg', self.projectId, trainingDataset).then(
                     function (success) {
-                        self.showTrainingDatasets()
                     }, function (error) {
-                        self.showTrainingDatasets()
                     });
             };
 
-            /**
-             * Opens the modal to view featurestore information
-             */
-            self.viewFeaturestoreInfo = function () {
-                ModalService.viewFeaturestoreInfo('lg', self.projectId, $scope.selected.value).then(
-                    function (success) {
-
-                    }, function (error) {
-                        //The user changed their mind.
-                    });
-            };
 
             /**
              * Opens the modal to view featuregroup information
@@ -671,25 +595,9 @@ angular.module('hopsWorksApp')
              * @param featuregroup
              */
             self.viewFeaturegroupInfo = function (featuregroup) {
-                ModalService.viewFeaturegroupInfo('lg', self.projectId, featuregroup, $scope.selected.value).then(
+                ModalService.viewFeaturegroupInfo('lg', self.projectId, featuregroup, self.featurestore, self.jobs).then(
                     function (success) {
-                        self.showFeaturegroups()
                     }, function (error) {
-                        self.showFeaturegroups()
-                    });
-            };
-
-            /**
-             * Opens the modal to view feature information
-             *
-             * @param feature
-             */
-            self.viewFeatureInfo = function (feature) {
-                ModalService.viewFeatureInfo('lg', self.projectId, feature, $scope.selected.value).then(
-                    function (success) {
-                        self.showFeatures()
-                    }, function (error) {
-                        self.showFeatures()
                     });
             };
 
@@ -699,11 +607,9 @@ angular.module('hopsWorksApp')
              * @param trainingDataset
              */
             self.viewTrainingDatasetInfo = function (trainingDataset) {
-                ModalService.viewTrainingDatasetInfo('lg', self.projectId, trainingDataset, $scope.selected.value).then(
+                ModalService.viewTrainingDatasetInfo('lg', self.projectId, trainingDataset, self.featurestore).then(
                     function (success) {
-                        self.showTrainingDatasets()
                     }, function (error) {
-                        self.showTrainingDatasets()
                     });
             };
 
@@ -713,11 +619,9 @@ angular.module('hopsWorksApp')
              * @param featuregroup
              */
             self.previewFeaturegroup = function (featuregroup) {
-                ModalService.previewFeaturegroup('lg', self.projectId, $scope.selected.value, featuregroup).then(
+                ModalService.previewFeaturegroup('lg', self.projectId, self.featurestore, featuregroup).then(
                     function (success) {
-                        self.showFeaturegroups()
                     }, function (error) {
-                        self.showFeaturegroups()
                     });
             };
 
@@ -730,7 +634,23 @@ angular.module('hopsWorksApp')
                 self.startLoading("Loading Feature store data...");
                 self.getTrainingDatasets(featurestore);
                 self.getFeaturegroups(featurestore)
+                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
+
+            /**
+             * Called when a new feature group is selected in the dropdown list in the UI of feature search result
+             *
+             * @param featuregroupName the name of the selected featuregroup
+             */
+            self.onSelectFeaturegroupSearchResultCallback = function (featuregroupName) {
+                for (var i = 0; i < self.featureSearchResultFeatures.length; i++) {
+                    if(self.featureSearchResultFeatures[i].featuregroup == featuregroupName) {
+                        self.featureSearchResult = self.featureSearchResultFeatures[i]
+                        return
+                    }
+                }
+            };
+
 
             /**
              * Initializes the UI by retrieving featurstores from the backend
@@ -749,27 +669,9 @@ angular.module('hopsWorksApp')
              * @param featuregroupName the featuregroup to go to
              */
             self.goToFeaturegroup = function (featuregroupName) {
-                self.showFeaturesBool = -1;
-                self.showFeaturegroupsBool = 1;
                 self.fgFilter = featuregroupName;
             };
 
-
-            /**
-             * Check if a job of a featuregroup in the featurestore belongs to this project's jobs or another project
-             *
-             * @param jobId the jobId to lookup
-             */
-            self.isJobLocal = function (jobId) {
-                var i;
-                var jobFoundBool = false;
-                for (i = 0; i < self.jobs.length; i++) {
-                    if (self.jobs[i].id === jobId) {
-                        jobFoundBool = true
-                    }
-                }
-                return jobFoundBool
-            };
 
             /**
              * Gets all jobs for the project
@@ -793,6 +695,34 @@ angular.module('hopsWorksApp')
             };
 
             /**
+             * Add version to featuregroup name
+             *
+             * @param featuregroupName the original featuregroup name
+             * @param version the version
+             * @returns the featuregroupVersionName
+             */
+            self.getFeaturegroupSelectName = function (featuregroupName, version) {
+                return featuregroupName + "_" + version
+            };
+
+            /**
+             * Get the API code to retrieve the feature
+             */
+            self.getCode = function (feature) {
+                var codeStr = "from hops import featurestore\n"
+                codeStr = codeStr + "featurestore.get_feature(\n"
+                codeStr = codeStr + "'" + feature.name + "'"
+                codeStr = codeStr + ",\nfeaturestore="
+                codeStr = codeStr + "'" + self.featurestore.featurestoreName + "'"
+                codeStr = codeStr + ",\nfeaturegroup="
+                codeStr = codeStr + "'" + feature.featuregroup + "'"
+                codeStr = codeStr + ",\nfeaturegroup_version="
+                codeStr = codeStr + feature.version
+                codeStr = codeStr + ")"
+                return codeStr
+            };
+
+            /**
              * Format javascript date as string (YYYY-mm-dd HH:MM:SS)
              *
              * @param javaDate date to format
@@ -801,6 +731,38 @@ angular.module('hopsWorksApp')
             $scope.formatDate = function (javaDate) {
                 var d = new Date(javaDate);
                 return d.getFullYear().toString() + "-" + ((d.getMonth() + 1).toString().length == 2 ? (d.getMonth() + 1).toString() : "0" + (d.getMonth() + 1).toString()) + "-" + (d.getDate().toString().length == 2 ? d.getDate().toString() : "0" + d.getDate().toString()) + " " + (d.getHours().toString().length == 2 ? d.getHours().toString() : "0" + d.getHours().toString()) + ":" + ((parseInt(d.getMinutes() / 5) * 5).toString().length == 2 ? (parseInt(d.getMinutes() / 5) * 5).toString() : "0" + (parseInt(d.getMinutes() / 5) * 5).toString()) + ":00";
+            };
+
+            /**
+             * Called when the launch-job button is pressed
+             */
+            self.launchJob = function (jobName) {
+                JobService.setJobFilter(jobName);
+                self.goToUrl("jobs")
+            };
+
+            self.getFeaturegroupByNameAndVersion = function(featuregroupName, version) {
+                for (var i = 0; i < self.featuregroups.length; i++) {
+                    if(self.featuregroups[i].name == featuregroupName && self.featuregroups[i].version == version){
+                        return self.featuregroups[i]
+                    }
+                }
+            }
+
+            /**
+             * Check if a job of a featuregroup in the featurestore belongs to this project's jobs or another project
+             *
+             * @param jobId the jobId to lookup
+             */
+            self.isJobLocal = function (jobId) {
+                var i;
+                var jobFoundBool = false;
+                for (i = 0; i < self.jobs.length; i++) {
+                    if (self.jobs[i].id === jobId) {
+                        jobFoundBool = true
+                    }
+                }
+                return jobFoundBool
             };
 
             self.init()
