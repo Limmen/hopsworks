@@ -252,21 +252,38 @@ angular.module('hopsWorksApp')
                 }
             }
 
+              /**
+               * Checks whether a dataset is the project hive database
+               *
+               * @param dataset the dataset to check
+               * @returns {boolean} true if it is the project's hive database
+               */
             self.isHive = function(dataset) {
-                if(dataset.path.includes("apps/hive/warehouse") && dataset.name == self.projectName + ".db"){
+                if(dataset.path.includes("apps/hive/warehouse") && dataset.name == self.projectName.toLowerCase() + ".db"){
                     return true
                 }
                 return false
             }
 
+              /**
+               * Checks wheter a dataset is the project featurestore database
+               *
+               * @param dataset the dataset to check
+               * @returns {boolean} true if it is the project's featurestore
+               */
             self.isFeaturestore = function(dataset) {
-                if(dataset.path.includes("apps/hive/warehouse") && dataset.name == (self.projectName + "_featurestore.db")){
+                if(dataset.path.includes("apps/hive/warehouse") && dataset.name == (self.projectName.toLowerCase() + "_featurestore.db")){
                     return true
                 }
                 return false
             }
 
 
+              /**
+               * Checks
+               * @param dataset
+               * @returns {boolean}
+               */
             self.isTrainingDatasets = function(dataset) {
                 if(dataset.name == self.projectName + "_Training_Datasets") {
                     return true
@@ -283,21 +300,11 @@ angular.module('hopsWorksApp')
                 var featurestoreDb = null
                 var traningDatasets = null
                 for (var i = 0; i < self.files.length; i++) {
-                    if(self.isHive(self.files[i])){
-                        hiveDb = self.files[i]
+                    if(self.isHive(self.files[i]) || self.isTrainingDatasets(self.files[i])){
+                        pinnedDatasets.push(self.files[i])
                         continue
-                    }
-                    if(self.isFeaturestore(self.files[i])){
-                        featurestoreDb = self.files[i]
-                        continue
-                    }
-                    if(self.isTrainingDatasets(self.files[i])){
-                        traningDatasets = self.files[i]
                     }
                 }
-                pinnedDatasets.push(hiveDb)
-                pinnedDatasets.push(featurestoreDb)
-                pinnedDatasets.push(traningDatasets)
                 return pinnedDatasets
             }
 
@@ -307,8 +314,7 @@ angular.module('hopsWorksApp')
               self.getRegularDatasets = function() {
                   var regularDatasets = []
                   for (var i = 0; i < self.files.length; i++) {
-                      if(!self.isHive(self.files[i]) && !self.isFeaturestore(self.files[i]) &&
-                          !self.isTrainingDatasets(self.files[i])) {
+                      if(!self.isHive(self.files[i]) && !self.isTrainingDatasets(self.files[i])) {
                           regularDatasets.push(self.files[i])
                       }
                   }

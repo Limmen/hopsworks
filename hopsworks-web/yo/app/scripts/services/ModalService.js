@@ -1210,61 +1210,7 @@ angular.module('hopsWorksApp')
                 });
                 return modalInstance.result;
             },
-            viewFeatureSchemaContent: function (size, projectId, featuregroup) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/featureSchemaViewContent.html',
-                    controller: 'featureSchemaViewContentCtrl as featureSchemaViewContentCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featuregroup: function () {
-                            return featuregroup;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            viewTrainingDatasetSchemaContent: function (size, projectId, trainingDataset) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/viewTrainingDatasetSchemaContent.html',
-                    controller: 'viewTrainingDatasetSchemaContentCtrl as viewTrainingDatasetSchemaContentCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        trainingDataset: function () {
-                            return trainingDataset;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            viewFeaturegroupStatistics: function (size, projectId, featuregroup) {
+            viewFeaturegroupStatistics: function (size, projectId, featuregroup, projectName, featurestore) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/featuregroupStatistics.html',
                     controller: 'featuregroupStatisticsCtrl as featuregroupStatisticsCtrl',
@@ -1286,6 +1232,12 @@ angular.module('hopsWorksApp')
                         },
                         featuregroup: function () {
                             return featuregroup;
+                        },
+                        projectName: function () {
+                            return projectName;
+                        },
+                        featurestore: function () {
+                            return featurestore;
                         }
                     }
                 });
@@ -1327,10 +1279,11 @@ angular.module('hopsWorksApp')
                 });
                 return modalInstance.result;
             },
-            viewFeaturegroupDependencies: function (size, projectId, featuregroup) {
+            updateFeaturestoreStatistic: function (size, projectId, featuregroup, trainingDataset, projectName,
+                                                   featurestore) {
                 var modalInstance = $uibModal.open({
-                    templateUrl: 'views/featuregroupDependencies.html',
-                    controller: 'featuregroupDependenciesCtrl as featuregroupDependenciesCtrl',
+                    templateUrl: 'views/featurestoreUpdateStatisticModal.html',
+                    controller: 'updateFeaturestoreStatisticModalCtrl as updateFeaturestoreStatisticModalCtrl',
                     size: size,
                     resolve: {
                         auth: ['$q', '$location', 'AuthService',
@@ -1349,39 +1302,21 @@ angular.module('hopsWorksApp')
                         },
                         featuregroup: function () {
                             return featuregroup;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            viewTrainingDatasetDependencies: function (size, projectId, trainingDataset) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/trainingDatasetDependencies.html',
-                    controller: 'trainingDatasetDependenciesCtrl as trainingDatasetDependenciesCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
                         },
                         trainingDataset: function () {
                             return trainingDataset;
+                        },
+                        featurestore: function () {
+                            return featurestore;
+                        },
+                        projectName: function () {
+                            return projectName;
                         }
                     }
                 });
                 return modalInstance.result;
             },
-            viewTrainingDatasetStatistics: function (size, projectId, trainingDataset) {
+            viewTrainingDatasetStatistics: function (size, projectId, trainingDataset, projectName, featurestore) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/trainingDatasetStatistics.html',
                     controller: 'trainingDatasetStatisticsCtrl as trainingDatasetStatisticsCtrl',
@@ -1403,15 +1338,21 @@ angular.module('hopsWorksApp')
                         },
                         trainingDataset: function () {
                             return trainingDataset;
+                        },
+                        featurestore: function () {
+                            return featurestore;
+                        },
+                        projectName: function () {
+                            return projectName;
                         }
                     }
                 });
                 return modalInstance.result;
             },
-            viewFeaturestoreInfo: function (size, projectId, featurestore) {
+            viewFeatureInfo: function (size, projectId, feature, featurestore) {
                 var modalInstance = $uibModal.open({
-                    templateUrl: 'views/featurestoreViewInfo.html',
-                    controller: 'featurestoreViewInfoCtrl as featurestoreViewInfoCtrl',
+                    templateUrl: 'views/featureViewInfo.html',
+                    controller: 'featureViewInfoCtrl as featureViewInfoCtrl',
                     size: size,
                     resolve: {
                         auth: ['$q', '$location', 'AuthService',
@@ -1427,6 +1368,9 @@ angular.module('hopsWorksApp')
                             }],
                         projectId: function () {
                             return projectId;
+                        },
+                        feature: function () {
+                            return feature;
                         },
                         featurestore: function () {
                             return featurestore;
@@ -1465,36 +1409,6 @@ angular.module('hopsWorksApp')
                 });
                 return modalInstance.result;
             },
-            viewFeatureInfo: function (size, projectId, feature, featurestore) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/featureViewInfo.html',
-                    controller: 'featureViewInfoCtrl as featureViewInfoCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        feature: function () {
-                            return feature;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
             viewTrainingDatasetInfo: function (size, projectId, trainingDataset, featurestore) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/trainingDatasetViewInfo.html',
@@ -1525,216 +1439,6 @@ angular.module('hopsWorksApp')
                 });
                 return modalInstance.result;
             },
-            createFeaturegroup: function (size, projectId, featurestore, jobs, featuregroups) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/createFeaturegroup.html',
-                    controller: 'createFeaturegroupCtrl as createFeaturegroupCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        featuregroups: function () {
-                            return featuregroups;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            createTrainingDataset: function (size, projectId, featurestore, jobs, trainingDatasets) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/createTrainingDataset.html',
-                    controller: 'createTrainingDatasetCtrl as createTrainingDatasetCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        trainingDatasets: function () {
-                            return trainingDatasets;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            updateFeaturegroup: function (size, projectId, featuregroup, featurestore, jobs, featuregroups) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/updateFeaturegroup.html',
-                    controller: 'updateFeaturegroupCtrl as updateFeaturegroupCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featuregroup: function () {
-                            return featuregroup;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        featuregroups: function () {
-                            return featuregroups;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            updateTrainingDataset: function (size, projectId, trainingDataset, featurestore, jobs, trainingDatasets) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/updateTrainingDataset.html',
-                    controller: 'updateTrainingDatasetCtrl as updateTrainingDatasetCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        trainingDatasets: function () {
-                            return trainingDatasets;
-                        },
-                        trainingDataset: function () {
-                            return trainingDataset;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            createNewFeaturegroupVersion: function (size, projectId, featuregroup, featurestore, jobs, featuregroups) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/createNewFeaturegroupVersion.html',
-                    controller: 'createNewFeaturegroupVersionCtrl as createNewFeaturegroupVersionCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featuregroup: function () {
-                            return featuregroup;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        featuregroups: function () {
-                            return featuregroups;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            createNewTrainingDatasetVersion: function (size, projectId, trainingDataset, featurestore, jobs, trainingDatasets) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/createNewTrainingDatasetVersion.html',
-                    controller: 'createNewTrainingDatasetVersionCtrl as createNewTrainingDatasetVersionCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        trainingDataset: function () {
-                            return trainingDataset;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        jobs: function () {
-                            return jobs;
-                        },
-                        trainingDatasets: function () {
-                            return trainingDatasets;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
             selectFeatureType: function (size) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/selectFeatureType.html',
@@ -1752,63 +1456,6 @@ angular.module('hopsWorksApp')
                                         return $q.reject(err);
                                     });
                             }],
-                    }
-                });
-                return modalInstance.result;
-            },
-            previewFeaturegroup: function (size, projectId, featurestore, featuregroup) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/previewFeaturegroup.html',
-                    controller: 'previewFeaturegroupCtrl as previewFeaturegroupCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        projectId: function () {
-                            return projectId;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        },
-                        featuregroup: function () {
-                            return featuregroup;
-                        }
-                    }
-                });
-                return modalInstance.result;
-            },
-            viewFeatureApiCode: function (size, feature, featurestore) {
-                var modalInstance = $uibModal.open({
-                    templateUrl: 'views/featureViewCode.html',
-                    controller: 'featureViewCodeCtrl as featureViewCodeCtrl',
-                    size: size,
-                    resolve: {
-                        auth: ['$q', '$location', 'AuthService',
-                            function ($q, $location, AuthService) {
-                                return AuthService.session().then(
-                                    function (success) {
-                                    },
-                                    function (err) {
-                                        $location.path('/login');
-                                        $location.replace();
-                                        return $q.reject(err);
-                                    });
-                            }],
-                        feature: function () {
-                            return feature;
-                        },
-                        featurestore: function () {
-                            return featurestore;
-                        }
                     }
                 });
                 return modalInstance.result;
