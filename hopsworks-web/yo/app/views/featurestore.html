@@ -342,7 +342,8 @@
                                             <div class="col-sm-1">
                                             </div>
                                         </div>
-                                        <div id="accordion" role="tablist" aria-multiselectable="true" style="margin-top:20px" class="col-sm-11">
+                                        <div id="accordion" role="tablist" aria-multiselectable="true"
+                                             style="margin-top:20px" class="col-sm-11">
                                             <div class="card">
 
                                                 <h5 class="text-uppercase bold_fs" style="margin-top: 20px;
@@ -429,7 +430,8 @@
                                                         </li>
                                                         <li>
                                                             <code class="text-lowercase">Size:</code>
-                                                            <i ng-if="featurestoreCtrl.featuregroupSizeWorking" style="margin-top: 2px"
+                                                            <i ng-if="featurestoreCtrl.featuregroupSizeWorking"
+                                                               style="margin-top: 2px"
                                                                class="fa fa-spinner fa-spin pull-right"></i>
                                                             {{featurestoreCtrl.featuregroupSize}}
                                                         </li>
@@ -525,39 +527,61 @@
                                  src="images/cross_project_features_banner.png" alt="Card image cap">
                             <div class="card-block">
                                 <h4 class="card-title">Cross-Project Features</h4>
-                                <p class="card-text">Feature Stores can be shared across projects. View which
-                                    feature stores have been shared with your project.</p>
-                                <p class="card-text">
-                                    <small class="text-muted">Number of available feature stores: {{featurestoreCtrl.featurestores.length}}</small>
-                                </p>
+                                <div class="row">
+                                    <p class="card-text">
+                                        Feature Stores can be shared across projects.
+                                        Select which Feature Store to browse.
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">Number of available feature stores:
+                                            {{featurestoreCtrl.featurestores.length}}
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="row" style="margin-top: 10px">
+                                    <ui-select ng-model="featurestoreCtrl.featurestore"
+                                               on-select="featurestoreCtrl.onSelectFeaturestoreCallback($item)"
+                                               style="z-index: 101"
+                                               id="selectFeaturestore"
+                                    >
+                                        <ui-select-match placeholder="Select a feature store">
+                                            <span>{{$select.selected.featurestoreName}}</span>
+                                        </ui-select-match>
+                                        <ui-select-choices
+                                                repeat="item in featurestoreCtrl.featurestores">
+                                            <span ng-bind="item.featurestoreName"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
                             </div>
                         </div>
                         <div class="card card-block text-center docs_link">
                             <h4 class="card-title">Documentation</h4>
                             <p>
-                            <a class="third after" href="https://hopsworks.readthedocs.io/en/0.9/user_guide/hopsworks/featurestore.html">
-                                General Documentation
-                            </a>
+                                <a class="third after"
+                                   href="https://hopsworks.readthedocs.io/en/0.9/user_guide/hopsworks/featurestore.html">
+                                    General Documentation
+                                </a>
                             </p>
                             <p>
-                            <a class="third after" href="https://www.logicalclocks.com/feature-store/">
-                                Blog Post
-                            </a>
+                                <a class="third after" href="https://www.logicalclocks.com/feature-store/">
+                                    Blog Post
+                                </a>
                             </p>
                             <p>
-                            <a class="third after" href="http://hops-py.logicalclocks.com/">
-                                Python API
-                            </a>
+                                <a class="third after" href="http://hops-py.logicalclocks.com/">
+                                    Python API
+                                </a>
                             </p>
                             <p>
-                            <a class="third after" href="http://snurran.sics.se/hops/hops-util-javadoc/0.10.0/">
-                                Java/Scala API
-                            </a>
+                                <a class="third after" href="http://snurran.sics.se/hops/hops-util-javadoc/0.10.0/">
+                                    Java/Scala API
+                                </a>
                             </p>
                             <p>
-                            <a class="third after" href="https://github.com/logicalclocks/hops-examples">
-                                Examples
-                            </a>
+                                <a class="third after" href="https://github.com/logicalclocks/hops-examples">
+                                    Examples
+                                </a>
                             </p>
                         </div>
                         <div class="card">
