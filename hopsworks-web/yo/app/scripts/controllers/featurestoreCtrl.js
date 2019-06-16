@@ -36,7 +36,7 @@ angular.module('hopsWorksApp')
             self.trainingDatasets = [];
             self.featuregroups = [];
             self.jobs = [];
-            self.pageSize = 12;
+            self.pageSize = 11;
             self.featuresPageSize = 10;
             self.currentPage = 1;
             self.featurestore;
@@ -53,6 +53,7 @@ angular.module('hopsWorksApp')
             self.loading = false;
             self.loadingText = "";
             self.featuregroupsLoaded = false;
+            self.jobsLoaded = false;
             self.trainingDatasetsLoaded = false;
             self.tourService = TourService;
             self.tourService.currentStep_TourNine = 0; //Feature store tour
@@ -63,6 +64,11 @@ angular.module('hopsWorksApp')
             self.featurestoreSize = "Not fetched"
             self.featuregroupSizeWorking = false
             self.featuregroupSize = "Not fetched"
+            self.fe_jobs = []
+            self.date = new Date()
+            self.numRecentFeJobs = 10
+            self.quotaChartOptions = null;
+            self.quotaChart = null;
 
             /**
              * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
@@ -102,14 +108,16 @@ angular.module('hopsWorksApp')
              * @param pageIndex the index in the current page
              */
             self.getTotalIndex = function (pageIndex) {
-                return ((self.currentPage-1)*self.featuresPageSize) + pageIndex + 1
+                return ((self.currentPage - 1) * self.featuresPageSize) + pageIndex + 1
             };
 
             /**
              * Function to stop the loading screen
              */
             self.stopLoading = function () {
-                if(self.featuregroupsLoaded && self.trainingDatasetsLoaded){
+                if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded) {
+                    //self.renderQuotaChart();
+                    self.setFeatureEngineeringJobs();
                     self.loading = false;
                     self.loadingText = "";
                 }
@@ -122,7 +130,7 @@ angular.module('hopsWorksApp')
                 self.featureSearchResultFeaturegroups = []
                 self.featureSearchResultFeatures = []
                 for (var i = 0; i < self.features.length; i++) {
-                    if(self.features[i].name == searchQuery) {
+                    if (self.features[i].name == searchQuery) {
                         var fg = {
                             "name": self.features[i].featuregroup,
                             "longName": self.getFeaturegroupSelectName(self.features[i].featuregroup, self.features[i].version),
@@ -132,12 +140,12 @@ angular.module('hopsWorksApp')
                         self.featureSearchResultFeatures.push(self.features[i])
                     }
                 }
-                if(self.featureSearchResultFeatures.length == 0) {
+                if (self.featureSearchResultFeatures.length == 0) {
                     self.featureSearchResult = "Feature '" + searchQuery + "' not found.";
                 } else {
                     self.featureSearchResult = self.featureSearchResultFeatures[0]
                     self.selectedSearchFeaturegroup = self.featureSearchResultFeaturegroups[0]
-                    self.fetchFeatruegroupSize(self.selectedSearchFeaturegroup.featuregroup)
+                    self.fetchFeaturegroupSize(self.selectedSearchFeaturegroup.featuregroup)
                 }
             };
 
@@ -160,7 +168,7 @@ angular.module('hopsWorksApp')
              * Check whether feature search result is available
              */
             self.hasFeatureSearchResult = function () {
-                if(!self.featureSearchResult || self.featureSearchResult == undefined || self.featureSearchResult == null) {
+                if (!self.featureSearchResult || self.featureSearchResult == undefined || self.featureSearchResult == null) {
                     return false
                 } else {
                     return true
@@ -171,7 +179,7 @@ angular.module('hopsWorksApp')
              * Check whether feature search result is "not found"
              */
             self.featureSearchResultIsNotFound = function () {
-                if(self.hasFeatureSearchResult() && typeof self.featureSearchResult === 'string' &&
+                if (self.hasFeatureSearchResult() && typeof self.featureSearchResult === 'string' &&
                     self.featureSearchResult.includes("not found")) {
                     return true;
                 } else {
@@ -614,7 +622,7 @@ angular.module('hopsWorksApp')
              * @param trainingDataset
              */
             self.viewTrainingDatasetInfo = function (trainingDataset) {
-                ModalService.viewTrainingDatasetInfo('lg', self.projectId, trainingDataset, self.featurestore).then(
+                ModalService.viewTrainingDatasetInfo('lg', self.projectId, trainingDataset, self.featurestore, self.jobs).then(
                     function (success) {
                     }, function (error) {
                     });
@@ -651,7 +659,7 @@ angular.module('hopsWorksApp')
              */
             self.onSelectFeaturegroupSearchResultCallback = function (featuregroupName) {
                 for (var i = 0; i < self.featureSearchResultFeatures.length; i++) {
-                    if(self.featureSearchResultFeatures[i].featuregroup == featuregroupName) {
+                    if (self.featureSearchResultFeatures[i].featuregroup == featuregroupName) {
                         self.featureSearchResult = self.featureSearchResultFeatures[i]
                         return
                     }
@@ -666,8 +674,8 @@ angular.module('hopsWorksApp')
                 self.startLoading("Loading Feature store data...");
                 self.getFeaturestores();
                 self.getAllJobs();
+                self.setupQuotaChart();
             };
-
 
             /**
              * Called when clicking the link to featuregroup from the list of features. Switches the view to the
@@ -684,13 +692,64 @@ angular.module('hopsWorksApp')
              * Gets all jobs for the project
              */
             self.getAllJobs = function () {
-                JobService.getJobs(self.projectId).then(
+                var expansion = "&expand=executions(offset=0;limit=1;sort_by=id:desc)";
+                JobService.getJobs(self.projectId, 0, 0, expansion).then(
                     function (success) {
                         self.jobs = success.data.items;
+                        self.jobsLoaded = true
+                        self.stopLoading();
                     }, function (error) {
+                        self.jobsLoaded = true
+                        self.stopLoading();
                         growl.error(error.data.errorMsg, {title: 'Failed to fetch jobs for the project', ttl: 15000});
                     });
             };
+
+            /**
+             * Set feature engineering jobs to show in the featurestore UI
+             */
+            self.setFeatureEngineeringJobs = function () {
+                var matched_jobs = []
+                for (var i = 0; i < self.jobs.length; i++) {
+                    if (typeof self.jobs[i].executions.items !== 'undefined') {
+                        self.jobs[i].state = self.jobs[i].executions.items[0].state;
+                        self.jobs[i].finalStatus = self.jobs[i].executions.items[0].finalStatus;
+                        self.jobs[i].progress = self.jobs[i].executions.items[0].progress;
+                        self.jobs[i].duration = self.jobs[i].executions.items[0].duration;
+                        self.jobs[i].submissionTime = self.jobs[i].executions.items[0].submissionTime;
+                        var match = false
+                        for (var j = 0; j < self.featuregroups.length; j++) {
+                            if (self.jobs[i].name == self.featuregroups[j].jobName && (self.jobs[i].submissionTime !== 'undefined' && self.jobs[i].submissionTime !== null)) {
+                                match = true
+                                break;
+                            }
+                        }
+                        if (!match) {
+                            for (var j = 0; j < self.trainingDatasets.length; j++) {
+                                if (self.jobs[i].name == self.trainingDatasets[j].jobName && (self.jobs[i].submissionTime !== 'undefined' && self.jobs[i].submissionTime !== null)) {
+                                    match = true
+                                    break;
+                                }
+                            }
+                        }
+                        if (match) {
+                            matched_jobs.push(self.jobs[i])
+                        }
+                    }
+                }
+                matched_jobs.sort(function (a, b) {
+                    // subtract dates
+                    // to get a value that is either negative, positive, or zero.
+                    a = new Date(a.submissionTime);
+                    b = new Date(b.submissionTime);
+                    return b-a
+                });
+                if (matched_jobs.length > self.numRecentFeJobs) {
+                    self.fe_jobs = matched_jobs.slice(0, self.numRecentFeJobs)
+                } else {
+                    self.fe_jobs = matched_jobs
+                }
+            }
 
             /**
              * Convert bytes into bytes + suitable unit (e.g KB, MB, GB etc)
@@ -755,9 +814,9 @@ angular.module('hopsWorksApp')
              * @param version the version of the featuergroup
              * @returns featuregroup
              */
-            self.getFeaturegroupByNameAndVersion = function(featuregroupName, version) {
+            self.getFeaturegroupByNameAndVersion = function (featuregroupName, version) {
                 for (var i = 0; i < self.featuregroups.length; i++) {
-                    if(self.featuregroups[i].name == featuregroupName && self.featuregroups[i].version == version){
+                    if (self.featuregroups[i].name == featuregroupName && self.featuregroups[i].version == version) {
                         return self.featuregroups[i]
                     }
                 }
@@ -768,7 +827,7 @@ angular.module('hopsWorksApp')
              * this can potentially be a long running operation if the directory is deeply nested
              */
             self.fetchFeaturestoreSize = function () {
-                if(self.featurestoreSizeWorking){
+                if (self.featurestoreSizeWorking) {
                     return
                 }
                 self.featurestoreSizeWorking = true
@@ -782,8 +841,12 @@ angular.module('hopsWorksApp')
                 });
             };
 
-            self.fetchFeatruegroupSize = function (featuregroup) {
-                if(self.featuregroupSizeWorking){
+            /**
+             * Send async request to hopsworks to calculate the inode size of a feature group
+             * this can potentially be a long running operation if the directory is deeply nested
+             */
+            self.fetchFeaturegroupSize = function (featuregroup) {
+                if (self.featuregroupSizeWorking) {
                     return
                 }
                 self.featuregroupSizeWorking = true
@@ -797,6 +860,51 @@ angular.module('hopsWorksApp')
                 });
             };
 
+            self.setupQuotaChart = function() {
+                var quotaChartOptions = {
+                    chart: {
+                        height: 175,
+                        type: 'radialBar',
+                    },
+                    plotOptions: {
+                        radialBar: {
+                            hollow: {
+                                size: '70%',
+                                offsetY: -60,
+                                offsetX: -200,
+                            }
+                        },
+                    },
+                    fill: {
+                        colors: ['#111']
+                    },
+                    dataLabels: {
+                        style: {
+                            fontSize: '14px',
+                            colors: ['#111']
+                        }
+                    },
+                    stroke: {
+                        lineCap: "round",
+                    },
+                    colors:["#111"],
+                    series: [70],
+                    labels: ['Quota'],
+                }
+                self.quotaChartOptions = quotaChartOptions
+            }
+
+            self.renderQuotaChart = function() {
+                /*
+                $("#headRow").ready(function () {
+                    self.quotaChart = new ApexCharts(
+                        document.querySelector("#quotaChart"),
+                        self.quotaChartOptions
+                    );
+                    self.quotaChart.render();
+                });
+                */
+            }
 
             /**
              * Check if a job of a featuregroup in the featurestore belongs to this project's jobs or another project
@@ -812,6 +920,30 @@ angular.module('hopsWorksApp')
                     }
                 }
                 return jobFoundBool
+            };
+
+            self.toTitleCase = function (str) {
+                return str.replace(/\w\S*/g, function (txt) {
+                    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                }).replace(/_/g, ' ');
+            };
+
+            $scope.convertMS = function (ms) {
+                if (typeof ms === 'undefined') {
+                    return "";
+                }
+                var m, s;
+                s = Math.floor(ms / 1000);
+                m = Math.floor(s / 60);
+                s = s % 60;
+                if (s.toString().length < 2) {
+                    s = '0' + s;
+                }
+                if (m.toString().length < 2) {
+                    m = '0' + m;
+                }
+                var ret = m + ":" + s;
+                return ret;
             };
 
             self.init()

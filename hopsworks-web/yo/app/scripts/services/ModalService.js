@@ -1387,7 +1387,7 @@ angular.module('hopsWorksApp')
                 });
                 return modalInstance.result;
             },
-            viewTrainingDatasetInfo: function (size, projectId, trainingDataset, featurestore) {
+            viewTrainingDatasetInfo: function (size, projectId, trainingDataset, featurestore, jobs) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'views/trainingDatasetViewInfo.html',
                     controller: 'trainingDatasetViewInfoCtrl as trainingDatasetViewInfoCtrl',
@@ -1412,6 +1412,9 @@ angular.module('hopsWorksApp')
                         },
                         featurestore: function () {
                             return featurestore;
+                        },
+                        jobs: function () {
+                            return jobs;
                         }
                     }
                 });

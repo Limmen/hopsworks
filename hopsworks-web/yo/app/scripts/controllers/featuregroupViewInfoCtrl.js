@@ -85,6 +85,7 @@ angular.module('hopsWorksApp')
              */
             self.launchJob = function (jobName) {
                 JobService.setJobFilter(jobName);
+                self.close();
                 self.goToUrl("jobs")
             };
 
@@ -139,6 +140,8 @@ angular.module('hopsWorksApp')
                 self.table.push({"property": "Job", "value": "-"})
                 self.table.push({"property": "Last Computed", "value": "-"})
                 self.table.push({"property": "API Retrieval Code", "value": self.code})
+                self.fetchSchema()
+                self.fetchSize()
             };
 
             /**

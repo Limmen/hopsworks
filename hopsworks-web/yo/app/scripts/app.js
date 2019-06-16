@@ -51,6 +51,7 @@ angular.module('hopsWorksApp', [
   'ngTouch',
   'angular-md5',
   'angular-growl',
+  'angularMoment',
   'ui.bootstrap',
   'ui.select',
   'ngWebSocket',
@@ -76,8 +77,7 @@ angular.module('hopsWorksApp', [
   'nvd3',
   'ui.toggle',
   'ngFileSaver',
-  'ngFileUpload',
-  'googlechart'
+  'ngFileUpload'
 ])
         .config(['$routeProvider', '$httpProvider', '$compileProvider', 'flowFactoryProvider', 'accordionConfig', 
           function ($routeProvider, $httpProvider, $compileProvider, flowFactoryProvider, accordionConfig) {

@@ -22,19 +22,9 @@
 </div>
 <div class="modal-body" style="overflow: auto">
     <div class="row">
-        <button class="btn btn-primary" id="createFeaturegroupBtn"
-                ng-click="previewFeaturegroupCtrl.fetchSample()" style="margin-left: 10px">
-            Fetch Sample
-            <i ng-if="previewFeaturegroupCtrl.sampleWorking" style="margin-top: 2px"
-               class="fa fa-spinner fa-spin pull-right"></i>
-            <i class="fa fa-info-circle" tooltip-placement="auto left"
-               uib-tooltip="Runs SELECT * FROM featuregroup LIMIT 20 to fetch a sample"
-               style="margin-left: 10px"></i>
-        </button>
-    </div>
-    <div class="row">
         <p ng-if="previewFeaturegroupCtrl.notFetchedSample" style="margin-left: 10px; magin-top:10px">
-            Sample not fetched
+            <i ng-if="previewFeaturegroupCtrl.sampleWorking" style="margin-top: 2px; text-align: center"
+               class="fa fa-spinner fa-spin"></i>
         </p>
         <p ng-if="previewFeaturegroupCtrl.sampleColumns.length  === 0 && !previewFeaturegroupCtrl.notFetchedSample" style="margin-left: 10px; magin-top:10px">
             Feature group is empty
