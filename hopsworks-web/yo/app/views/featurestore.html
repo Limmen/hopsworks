@@ -67,9 +67,33 @@
                     <h2 class="sub-header margin-left">Feature Groups and Training Datasets</h2>
                     <div class="row mb-3">
                         <div class="col-lg-3 col-md-4">
-                            <div class="card" style="margin-top: 45px">
-                                <img class="card-img-top img-responsive" src="//placehold.it/740x180/bbb/fff?text=..."
-                                     alt="Card image cap">
+                        </div>
+                        <div class="col-lg-9 col-md-8">
+                            <div class="row"
+                                 ng-show="featurestoreCtrl.featurestoreEntitiesDictList.length > 0"
+                                 style="margin-right: 20px">
+                                <div class="row form-inline" style="margin-top: 10px;">
+                                    <div class="col-sm-6 col-md-6 col-lg-6 form-group">
+                                        <label style="margin-left: 20px">
+                                            Search:
+                                            <input class="form-control"
+                                                   style="margin-left: 10px;"
+                                                   ng-model="featurestoreCtrl.fseFilter">
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-3 col-md-4">
+                            <div class="card">
+                                <img class="card-img-top img-responsive" src="images/create_fg_banner.png"
+                                     alt="Card image cap"
+                                     ng-click="featurestoreCtrl.showCreateFeaturegroupForm()"
+                                >
                                 <div class="card-block">
                                     <h4 class="card-title">Define new features</h4>
                                     <p class="card-text">Specify the feature definitons, including the type,
@@ -111,18 +135,6 @@
                             <div class="row"
                                  ng-show="featurestoreCtrl.featurestoreEntitiesDictList.length > 0"
                                  style="margin-right: 20px">
-                                <div class="row form-inline" style="margin-top: 10px;">
-                                    <div class="col-sm-6 col-md-6 col-lg-6 form-group">
-                                        <label style="margin-left: 20px">
-                                            Search:
-                                            <input class="form-control"
-                                                                                        style="margin-left: 10px;"
-                                                                                        ng-model="featurestoreCtrl.fseFilter">
-                                        </label>
-                                    </div>
-                                    <div class="col-sm-6 col-md-6 col-lg-6">
-                                    </div>
-                                </div>
                                 <div class="table-responsive" id="fgAndTdTable">
                                     <table class="table table-striped">
                                         <thead class="thead-inverse">
@@ -130,7 +142,7 @@
                                             <th style="width: 40%" ng-click="featurestoreCtrl.sort('name')">
                                                 Name
                                                 <i class="fa fa-info-circle" tooltip-placement="auto left"
-                                                   uib-tooltip="The name of the feature group"
+                                                   uib-tooltip="The name of the feature group or training dataset"
                                                    style="margin-left: 5px"></i>
                                                 <span class="glyphicon sort-icon"
                                                       ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
@@ -274,7 +286,7 @@
                     <h2 class="sub-header margin-left">Feature Search</h2>
                     <div class="card-deck-wrapper mb-3 feature-search margin-left">
                         <div class="row">
-                            <div class="col-sm-2" style="margin-top:35px">
+                            <div class="col-sm-3" style="margin-top:35px">
                                 <form class="form-inline mr-auto">
                                     <input class="form-control mr-sm-2 f-search-input" type="text"
                                            placeholder="Search"
@@ -287,7 +299,7 @@
                                     </button>
                                 </form>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-5">
                                 <div ng-if="!featurestoreCtrl.hasFeatureSearchResult()">
                                     <h5 class="text-uppercase bold_fs" style="margin-top:100px; text-align:center">
                                         No Search Results
@@ -307,12 +319,12 @@
                                     <div ng-if="!featurestoreCtrl.featureSearchResultIsNotFound()" class="row">
                                         <div class="multipleSearchResults row"
                                              ng-if="featurestoreCtrl.hasMultipleSearchResults()"
-                                             style="margin-top:10px;">
+                                             style="margin-top:10px;margin-left:10px;margin-right:5px">
                                             <div class="col-sm-4"> The feature
                                                 `{{featurestoreCtrl.featureSearchResult.name}}` was found in
                                                 multiple feature groups.
                                             </div>
-                                            <div class="col-sm-8">
+                                            <div class="col-sm-7">
                                                 <ui-select ng-model="featurestoreCtrl.selectedSearchFeaturegroup"
                                                            on-select="featurestoreCtrl.onSelectFeaturegroupSearchResultCallback($item.name)"
                                                            style="z-index: 101"
@@ -327,8 +339,10 @@
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>
+                                            <div class="col-sm-1">
+                                            </div>
                                         </div>
-                                        <div id="accordion" role="tablist" aria-multiselectable="true">
+                                        <div id="accordion" role="tablist" aria-multiselectable="true" style="margin-top:20px" class="col-sm-11">
                                             <div class="card">
 
                                                 <h5 class="text-uppercase bold_fs" style="margin-top: 20px;
@@ -411,11 +425,13 @@
                                                         </li>
                                                         <li>
                                                             <code class="text-lowercase">Created:</code>
-                                                            {{featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.created}}
+                                                            {{formatDate(featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.created)}}
                                                         </li>
                                                         <li>
                                                             <code class="text-lowercase">Size:</code>
-                                                            TODO
+                                                            <i ng-if="featurestoreCtrl.featuregroupSizeWorking" style="margin-top: 2px"
+                                                               class="fa fa-spinner fa-spin pull-right"></i>
+                                                            {{featurestoreCtrl.featuregroupSize}}
                                                         </li>
                                                         <li>
                                                             <code class="text-lowercase">Job:</code>
@@ -424,7 +440,8 @@
                                                                 No job specified
                                                             </span>
                                                             <div
-                                                                    ng-if="featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.jobName !== null", style="display:inline;">
+                                                                    ng-if="featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.jobName !== null"
+                                                                    , style="display:inline;">
                                                                 <span ng-if="featurestoreCtrl.isJobLocal(featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.jobId)"
                                                                       style="cursor:pointer;color:black;text-decoration:underline;"
                                                                       ng-click="featurestoreCtrl.launchJob(featurestoreCtrl.selectedSearchFeaturegroup.featuregroup.jobName); $event.stopPropagation();">
@@ -440,6 +457,8 @@
                                                     </ul>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="col-sm-1">
                                         </div>
                                     </div>
                                 </div>
@@ -463,7 +482,7 @@
                                     </thead>
                                     <tbody>
                                     <tr
-                                            dir-paginate="feature in featurestoreCtrl.features| orderBy :featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | itemsPerPage:featurestoreCtrl.pageSize"
+                                            dir-paginate="feature in featurestoreCtrl.features| orderBy :featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | itemsPerPage:featurestoreCtrl.featuresPageSize"
                                             pagination-id="featurestable"
                                             current-page="featurestoreCtrl.currentPage"
                                     >
@@ -503,25 +522,43 @@
 
                         <div class="card">
                             <img class="card-img-top img-responsive"
-                                 src="//placehold.it/600x200/bbb/fff?text=..." alt="Card image cap">
+                                 src="images/cross_project_features_banner.png" alt="Card image cap">
                             <div class="card-block">
                                 <h4 class="card-title">Cross-Project Features</h4>
                                 <p class="card-text">Feature Stores can be shared across projects. View which
                                     feature stores have been shared with your project.</p>
                                 <p class="card-text">
-                                    <small class="text-muted">Number of available feature stores: 1</small>
+                                    <small class="text-muted">Number of available feature stores: {{featurestoreCtrl.featurestores.length}}</small>
                                 </p>
                             </div>
                         </div>
-                        <div class="card card-block text-center">
+                        <div class="card card-block text-center docs_link">
                             <h4 class="card-title">Documentation</h4>
-                            <p class="card-text">General documentation</p>
-                            <p class="card-text">API documentation</p>
-                            <p class="card-text">Examples</p>
-                        </div>
-                        <div class="card">
-                            <img class="card-img img-responsive" src="//placehold.it/600x200/777/fff?text=..."
-                                 alt="Card image">
+                            <p>
+                            <a class="third after" href="https://hopsworks.readthedocs.io/en/0.9/user_guide/hopsworks/featurestore.html">
+                                General Documentation
+                            </a>
+                            </p>
+                            <p>
+                            <a class="third after" href="https://www.logicalclocks.com/feature-store/">
+                                Blog Post
+                            </a>
+                            </p>
+                            <p>
+                            <a class="third after" href="http://hops-py.logicalclocks.com/">
+                                Python API
+                            </a>
+                            </p>
+                            <p>
+                            <a class="third after" href="http://snurran.sics.se/hops/hops-util-javadoc/0.10.0/">
+                                Java/Scala API
+                            </a>
+                            </p>
+                            <p>
+                            <a class="third after" href="https://github.com/logicalclocks/hops-examples">
+                                Examples
+                            </a>
+                            </p>
                         </div>
                         <div class="card">
                             <div class="card-block">
@@ -535,17 +572,19 @@
                                         <code class="text-lowercase">name:</code>
                                         {{featurestoreCtrl.featurestore.featurestoreName}}
                                     </li>
-                                    <li ><code class="text-lowercase">hdfs path:</code>
+                                    <li><code class="text-lowercase">hdfs path:</code>
                                         {{featurestoreCtrl.featurestore.hdfsStorePath}}
                                     </li>
-                                    <li><code class="text-lowercase">size</code>
-                                        TODO
+                                    <li><code class="text-lowercase">size:</code>
+                                        <i ng-if="featurestoreCtrl.featurestoreSizeWorking" style="margin-top: 2px"
+                                           class="fa fa-spinner fa-spin pull-right"></i>
+                                        {{featurestoreCtrl.featurestoreSize}}
                                     </li>
-                                    <li><code class="text-lowercase">created</code>
-                                        {{featurestoreCtrl.featurestore.created}}
+                                    <li><code class="text-lowercase">created:</code>
+                                        {{formatDate(featurestoreCtrl.featurestore.created)}}
                                     </li>
-                                    <li class="text-uppercase"><code class="text-lowercase">description</code>
-                                        {{featurestoreCtrl.featurestore.description}}
+                                    <li><code class="text-lowercase">description:</code>
+                                        {{featurestoreCtrl.featurestore.featurestoreDescription}}
                                     </li>
                                 </ul>
                             </div>

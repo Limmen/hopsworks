@@ -21,9 +21,9 @@
 
 angular.module('hopsWorksApp')
     .controller('featurestoreCtrl', ['$scope', '$routeParams', 'growl', 'FeaturestoreService', '$location', '$interval',
-        '$mdSidenav', 'ModalService', 'JobService', 'TourService',
+        '$mdSidenav', 'ModalService', 'JobService', 'TourService', 'ProjectService',
         function ($scope, $routeParams, growl, FeaturestoreService, $location, $interval, $mdSidenav, ModalService, JobService,
-                  TourService) {
+                  TourService, ProjectService) {
 
 
             /**
@@ -36,7 +36,8 @@ angular.module('hopsWorksApp')
             self.trainingDatasets = [];
             self.featuregroups = [];
             self.jobs = [];
-            self.pageSize = 10;
+            self.pageSize = 12;
+            self.featuresPageSize = 10;
             self.currentPage = 1;
             self.featurestore;
             self.featureSearchQuery = "";
@@ -58,6 +59,10 @@ angular.module('hopsWorksApp')
             self.featureSearchResult = null;
             self.featureSearchResultFeaturegroups = []
             self.selectedSearchFeaturegroup;
+            self.featurestoreSizeWorking = false
+            self.featurestoreSize = "Not fetched"
+            self.featuregroupSizeWorking = false
+            self.featuregroupSize = "Not fetched"
 
             /**
              * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
@@ -92,12 +97,12 @@ angular.module('hopsWorksApp')
             };
 
             /**
-             * Function to get the current index in a paginated table
+             * Function to get the current index in the paginated features table
              *
              * @param pageIndex the index in the current page
              */
             self.getTotalIndex = function (pageIndex) {
-                return ((self.currentPage-1)*self.pageSize) + pageIndex + 1
+                return ((self.currentPage-1)*self.featuresPageSize) + pageIndex + 1
             };
 
             /**
@@ -132,6 +137,7 @@ angular.module('hopsWorksApp')
                 } else {
                     self.featureSearchResult = self.featureSearchResultFeatures[0]
                     self.selectedSearchFeaturegroup = self.featureSearchResultFeaturegroups[0]
+                    self.fetchFeatruegroupSize(self.selectedSearchFeaturegroup.featuregroup)
                 }
             };
 
@@ -206,6 +212,7 @@ angular.module('hopsWorksApp')
                     function (success) {
                         self.featurestores = success.data;
                         self.featurestore = self.featurestores[0];
+                        self.fetchFeaturestoreSize();
                         if (!self.firstPull) {
                             self.getTrainingDatasets(self.featurestore);
                             self.getFeaturegroups(self.featurestore);
@@ -741,13 +748,55 @@ angular.module('hopsWorksApp')
                 self.goToUrl("jobs")
             };
 
+            /**
+             * Find featuregroup with a given name and version
+             *
+             * @param featuregroupName the name of the featuregroup
+             * @param version the version of the featuergroup
+             * @returns featuregroup
+             */
             self.getFeaturegroupByNameAndVersion = function(featuregroupName, version) {
                 for (var i = 0; i < self.featuregroups.length; i++) {
                     if(self.featuregroups[i].name == featuregroupName && self.featuregroups[i].version == version){
                         return self.featuregroups[i]
                     }
                 }
-            }
+            };
+
+            /**
+             * Send async request to hopsworks to calculate the inode size of the featurestore
+             * this can potentially be a long running operation if the directory is deeply nested
+             */
+            self.fetchFeaturestoreSize = function () {
+                if(self.featurestoreSizeWorking){
+                    return
+                }
+                self.featurestoreSizeWorking = true
+                var request = {id: self.projectId, type: "inode", inodeId: self.featurestore.inodeId};
+                ProjectService.getMoreInodeInfo(request).$promise.then(function (success) {
+                    self.featurestoreSizeWorking = false;
+                    self.featurestoreSize = self.sizeOnDisk(success.size)
+                }, function (error) {
+                    growl.error(error.data.errorMsg, {title: 'Failed to fetch size of featurestore', ttl: 5000});
+                    self.featurestoreSizeWorking = false;
+                });
+            };
+
+            self.fetchFeatruegroupSize = function (featuregroup) {
+                if(self.featuregroupSizeWorking){
+                    return
+                }
+                self.featuregroupSizeWorking = true
+                var request = {id: self.projectId, type: "inode", inodeId: featuregroup.inodeId};
+                ProjectService.getMoreInodeInfo(request).$promise.then(function (success) {
+                    self.featuregroupSizeWorking = false;
+                    self.featuregroupSize = self.sizeOnDisk(success.size)
+                }, function (error) {
+                    growl.error(error.data.errorMsg, {title: 'Failed to fetch size of feature group', ttl: 5000});
+                    self.featuregroupSizeWorking = false;
+                });
+            };
+
 
             /**
              * Check if a job of a featuregroup in the featurestore belongs to this project's jobs or another project
