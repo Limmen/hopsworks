@@ -48,7 +48,8 @@
                         <div class="col-sm-3">
                             <div class="fs_card card card-inverse card-info">
                                 <div class="fs_card card-block bg-info">
-                                    <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading">Feature Groups</h5>
+                                    <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading">Feature
+                                        Groups</h5>
                                     <h1 class="fs_card display-1 fs_top_card fs_top_num">
                                         {{featurestoreCtrl.featuregroups.length}}</h1>
                                 </div>
@@ -57,7 +58,8 @@
                         <div class="col-sm-3">
                             <div class="fs_card card card-inverse card-warning">
                                 <div class="fs_card card-block bg-warning">
-                                    <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading">Training Datasets</h5>
+                                    <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading">Training
+                                        Datasets</h5>
                                     <h1 class="fs_card display-1 fs_top_card fs_top_num">
                                         {{featurestoreCtrl.trainingDatasets.length}}</h1>
                                 </div>
@@ -72,7 +74,7 @@
                         <div class="col-sm-3">
                             <small class="text-muted">
                                 Last updated
-                                <!--<time am-time-ago="featurestoreCtrl.date"></time>-->
+                                <time am-time-ago="featurestoreCtrl.date"></time>
                             </small>
                         </div>
                         <div class="col-sm-3">
@@ -123,7 +125,7 @@
                                     <p class="fs_card card-text">Specify the feature definitons, including the type,
                                         and documentation. After defining the features, you can insert into the
                                         feature store using the Scala/Java or Python API.</p>
-                                    <a class="fs_card btn btn-primary"
+                                    <a class="fs_card btn btn-primary fs-banner-create"
                                        ng-click="featurestoreCtrl.showCreateFeaturegroupForm()"
                                        uib-tooltip="Create new feature group"
                                        id="createNewFg"
@@ -138,10 +140,11 @@
                                     <h3 class="fs_card card-title fs_card_title">Define an immutable dataset for machine
                                         learning
                                         experiments.</h3>
-                                    <p class="fs_card card-text">Datasets can be created for TensorFlow, PyTorch, SkLearn, and
+                                    <p class="fs_card card-text">Datasets can be created for TensorFlow, PyTorch,
+                                        SkLearn, and
                                         Keras. After defining the training dataset, you can insert into the
                                         feature store using the Scala/Java or Python API.</p>
-                                    <a class="fs_card btn btn-outline-secondary"
+                                    <a class="fs_card btn btn-outline-secondary fs-banner-create"
                                        ng-click="featurestoreCtrl.showCreateTrainingDatasetForm()"
                                        uib-tooltip="Create new training dataset"
                                        id="createNewTd"
@@ -422,7 +425,8 @@
                                                         Feature Group
                                                     </h5>
                                                 </div>
-                                                <div id="featuregroup" class="fs_card  card-block collapse" role="tabpanel"
+                                                <div id="featuregroup" class="fs_card  card-block collapse"
+                                                     role="tabpanel"
                                                      aria-labelledby="featuregroupHeading">
                                                     <ul class="list-unstyled">
                                                         <li>
@@ -627,7 +631,7 @@
                                 <p class="fs_card card-text">
                                     <small class="text-muted">
                                         Last updated
-                                        <!--<time am-time-ago="featurestoreCtrl.date"></time>-->
+                                        <time am-time-ago="featurestoreCtrl.date"></time>
                                     </small>
                                 </p>
                             </div>
@@ -638,28 +642,28 @@
                             <div class="fs_card card card-block text-center docs_link">
                                 <h4 class="fs_card card-title fs_card_title">Documentation</h4>
                                 <p>
-                                    <a class="third after"
+                                    <a class="third after fs-doc-link"
                                        href="https://hopsworks.readthedocs.io/en/0.9/user_guide/hopsworks/featurestore.html">
                                         General Documentation
                                     </a>
                                 </p>
                                 <p>
-                                    <a class="third after" href="https://www.logicalclocks.com/feature-store/">
+                                    <a class="third after fs-doc-link" href="https://www.logicalclocks.com/feature-store/">
                                         Blog Post
                                     </a>
                                 </p>
                                 <p>
-                                    <a class="third after" href="http://hops-py.logicalclocks.com/">
+                                    <a class="third after fs-doc-link" href="http://hops-py.logicalclocks.com/">
                                         Python API
                                     </a>
                                 </p>
                                 <p>
-                                    <a class="third after" href="http://snurran.sics.se/hops/hops-util-javadoc/0.10.0/">
+                                    <a class="third after fs-doc-link" href="http://snurran.sics.se/hops/hops-util-javadoc/0.10.0/">
                                         Java/Scala API
                                     </a>
                                 </p>
                                 <p>
-                                    <a class="third after" href="https://github.com/logicalclocks/hops-examples">
+                                    <a class="third after fs-doc-link" href="https://github.com/logicalclocks/hops-examples">
                                         Examples
                                     </a>
                                 </p>
@@ -699,12 +703,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-                    <script src="//cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
-                    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-
-
                     </body>
                 </div>
             </div>

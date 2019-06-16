@@ -116,7 +116,7 @@ angular.module('hopsWorksApp')
              */
             self.stopLoading = function () {
                 if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded) {
-                    //self.renderQuotaChart();
+                    self.renderQuotaChart();
                     self.setFeatureEngineeringJobs();
                     self.loading = false;
                     self.loadingText = "";
@@ -895,7 +895,6 @@ angular.module('hopsWorksApp')
             }
 
             self.renderQuotaChart = function() {
-                /*
                 $("#headRow").ready(function () {
                     self.quotaChart = new ApexCharts(
                         document.querySelector("#quotaChart"),
@@ -903,7 +902,6 @@ angular.module('hopsWorksApp')
                     );
                     self.quotaChart.render();
                 });
-                */
             }
 
             /**

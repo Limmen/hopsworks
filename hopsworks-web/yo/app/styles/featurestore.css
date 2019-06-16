@@ -673,7 +673,7 @@ body,
     font-size: 2rem;
 }
 
-.fs_stats .table-fill {
+.table-fill.fs_stats {
     background: white;
     border-radius:3px;
     border-collapse: collapse;
@@ -686,7 +686,7 @@ body,
     animation: float 5s infinite;
 }
 
-.fs_stats th {
+th.fs_stats {
     color:#D5DDE5;;
     background:#1b1e24;
     border-bottom:4px solid #9ea7af;
@@ -699,16 +699,16 @@ body,
     vertical-align:middle;
 }
 
-.fs_stats th:first-child {
+th:first-child.fs_stats {
     border-top-left-radius:3px;
 }
 
-.fs_stats th:last-child {
+th:last-child.fs_stats {
     border-top-right-radius:3px;
     border-right:none;
 }
 
-.fs_stats tr {
+tr.fs_stats {
     border-top: 1px solid #C1C3D1;
     border-bottom-: 1px solid #C1C3D1;
     color:#666B85;
@@ -717,37 +717,37 @@ body,
     text-shadow: 0 1px 1px rgba(256, 256, 256, 0.1);
 }
 
-.fs_stats tr:hover td {
+tr:hover.fs_stats td {
     background:#4E5066;
     color:#FFFFFF;
     border-top: 1px solid #22262e;
 }
 
-.fs_stats tr:first-child {
+tr:first-child.fs_stats {
     border-top:none;
 }
 
-.fs_stats tr:last-child {
+tr:last-child.fs_stats {
     border-bottom:none;
 }
 
-.fs_stats tr:nth-child(odd) td {
+tr:nth-child(odd).fs_stats td {
     background:#EBEBEB;
 }
 
-.fs_stats tr:nth-child(odd):hover td {
+tr:nth-child(odd):hover.fs_stats td {
     background:#4E5066;
 }
 
-.fs_stats tr:last-child td:first-child {
+tr:last-child.fs_stats td:first-child {
     border-bottom-left-radius:3px;
 }
 
-.fs_stats tr:last-child td:last-child {
+tr:last-child.fs_stats td:last-child {
     border-bottom-right-radius:3px;
 }
 
-.fs_stats td {
+td.fs_stats {
     background:#FFFFFF;
     padding:20px;
     text-align:left;
@@ -758,31 +758,31 @@ body,
     border-right: 1px solid #C1C3D1;
 }
 
-.fs_stats td:last-child {
+td:last-child.fs_stats {
     border-right: 0px;
 }
 
-.fs_stats th.text-left {
+th.text-left.fs_stats {
     text-align: left;
 }
 
-.fs_stats th.text-center {
+th.text-center.fs_stats {
     text-align: center;
 }
 
-.fs_stats th.text-right {
+th.text-right.fs_stats {
     text-align: right;
 }
 
-.fs_stats td.text-left {
+td.text-left.fs_stats {
     text-align: left;
 }
 
-.fs_stats td.text-center {
+td.text-center.fs_stats {
     text-align: center;
 }
 
-.fs_stats td.text-right {
+td.text-right.fs_stats {
     text-align: right;
 }
 
@@ -796,4 +796,14 @@ body,
 
 .fs_card_title {
     font-size:17px;
+}
+
+.fs-doc-link {
+    color:black;
+    text-decoration:underline;
+    font-weight:700;
+}
+
+.fs-banner-create {
+    text-decoration:none;
 }
