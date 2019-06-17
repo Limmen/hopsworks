@@ -488,7 +488,7 @@ table {
 
 .thead-inverse th {
     color: #fff;
-    background-color: #292b2c
+    background-color: rgba(0, 0, 0, 0.25)
 }
 
 .thead-default th {
@@ -785,7 +785,7 @@ td.text-right.fs_stats {
 
 
 .fs_sec_title {
-    color:black;
+    color:#555;
     font-size:17.5px;
     text-decoration-style: solid;
     font-weight: 600
@@ -798,9 +798,26 @@ td.text-right.fs_stats {
 .fs-doc-link {
     color:black;
     text-decoration:underline;
-    font-weight:700;
 }
 
 .fs-banner-create {
     text-decoration:none;
+}
+
+.fs-tab {
+    font-size: 15;
+    font-weight: 700;
+    color: #555;
+}
+
+.fs-tab .nav-link {
+    font-size: 15;
+    font-weight: 700;
+    color: #555;
+}
+
+.fs-tab.nav-link {
+    font-size: 15;
+    font-weight: 700;
+    color: #555;
 }

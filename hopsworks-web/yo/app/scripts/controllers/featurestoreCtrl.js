@@ -65,6 +65,7 @@ angular.module('hopsWorksApp')
             self.featurestoreSize = "Not fetched"
             self.featuregroupSizeWorking = false
             self.featuregroupSize = "Not fetched"
+            self.jobs = []
             self.fe_jobs = []
             self.date = new Date()
             self.numRecentFeJobs = 10
@@ -74,6 +75,10 @@ angular.module('hopsWorksApp')
             self.featureProgressChartOptions = null;
             self.featureProgressChart = null;
             self.numFeatureProgressChartDataPoints = 5;
+            self.showData = 1;
+            self.showOverview = -1;
+            self.showFeatureSearch = -1;
+            self.hasSearched = false
 
             /**
              * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
@@ -133,6 +138,7 @@ angular.module('hopsWorksApp')
              * Search for a feature name
              */
             self.featureSearch = function (searchQuery) {
+                self.hasSearched = true
                 self.featureSearchResultFeaturegroups = []
                 self.featureSearchResultFeatures = []
                 for (var i = 0; i < self.features.length; i++) {
@@ -168,6 +174,7 @@ angular.module('hopsWorksApp')
              */
             self.resetFeatureSearchResult = function () {
                 self.featureSearchResult = null
+                self.hasSearched = false
             };
 
             /**
@@ -722,7 +729,7 @@ angular.module('hopsWorksApp')
             self.onSelectFeaturestoreCallback = function (featurestore) {
                 self.startLoading("Loading Feature store data...");
                 self.getTrainingDatasets(featurestore);
-                self.getFeaturegroups(featurestore)
+                self.getFeaturegroups(featurestore);
                 self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
 
@@ -783,6 +790,9 @@ angular.module('hopsWorksApp')
              * Set feature engineering jobs to show in the featurestore UI
              */
             self.setFeatureEngineeringJobs = function () {
+                if(self.jobs == null || self.jobs.length == 0){
+                    return
+                }
                 var matched_jobs = []
                 for (var i = 0; i < self.jobs.length; i++) {
                     if (typeof self.jobs[i].executions.items !== 'undefined') {
@@ -840,10 +850,10 @@ angular.module('hopsWorksApp')
                 var end = moment(endDate)
                 var start = moment(startDate)
                 var diff = end.diff(start, 'days');
+                dates.push({"formatted": start.format(dateFormat), "raw": start.toDate()});
                 if(!start.isValid() || !end.isValid() || diff <= 0) {
                     return dates;
                 }
-                dates.push({"formatted": start.format(dateFormat), "raw": start.toDate()});
                 for(var i = 0; i < (diff/interval); i++) {
                     if(dates.length < maxDays){
                         dates.push({"formatted": start.add(interval,'d').format(dateFormat), "raw": start.toDate()});
@@ -1036,23 +1046,25 @@ angular.module('hopsWorksApp')
                 if(self.features.length > 0) {
                     var daysBetween = self.daysBetween(new Date(self.features[0].date), today)
                     var interval = self.getDateInterval(self.numFeatureProgressChartDataPoints, daysBetween)
-                    var days = self.getDateRange(new Date(self.features[0].date), today, "DD-MM-YY",
-                        interval, self.numFeatureProgressChartDataPoints)
+                    if(self.features.length >= self.numFeatureProgressChartDataPoints) {
+                        var days = self.getDateRange(new Date(self.features[0].date), today, "MMM Do YY",
+                            interval, self.numFeatureProgressChartDataPoints)
+                    } else {
+                        var days = self.getDateRange(new Date(self.features[0].date), today, "MMM Do YY",
+                            interval, self.features.length)
+                    }
                     for (var i = 0; i < days.length; i++) {
                         daysLabels.push(days[i].formatted)
                         daysValues.push(self.getFeatureProgressChartCounts(days[i].raw))
                     }
                 } else {
-                    daysLabels.push(moment(new Date()))
+                    daysLabels.push(moment(new Date()).format("MMM Do YY"))
                     daysValues.push(0)
-                    for (var i = 0; i < self.numFeatureProgressChartDataPoints; i++) {
-                        //daysLabels.push()
-                    }
                 }
 
                 var featureProgressChartOptions = {
                     chart: {
-                        height: 150,
+                        height: 200,
                         type: 'line',
                         zoom: {
                             enabled: false
@@ -1062,7 +1074,7 @@ angular.module('hopsWorksApp')
                         }
                     },
                     yaxis: {
-                        tickAmount: 2
+                        tickAmount: 4
                     },
                     dataLabels: {
                         enabled: false
@@ -1081,11 +1093,7 @@ angular.module('hopsWorksApp')
                         },
                     },
                     xaxis: {
-                        categories: daysLabels,
-                        labels: {
-                            rotate: -35,
-                            rotateAlways: true
-                        }
+                        categories: daysLabels
                     },
                     colors: ["#111"],
                 }
@@ -1097,14 +1105,17 @@ angular.module('hopsWorksApp')
              * "featureProgressChart"
              */
             self.renderFeatureProgressChart = function () {
-                self.setupFeatureProgressChart();
-                $("#headRow").ready(function () {
-                    self.featureProgressChart = new ApexCharts(
-                        document.querySelector("#featureProgressChart"),
-                        self.featureProgressChartOptions
-                    );
-                    self.featureProgressChart.render();
-                });
+                if(self.featureProgressChart == null) {
+                    console.log("render feature plot")
+                    self.setupFeatureProgressChart();
+                    $("#headRow").ready(function () {
+                        self.featureProgressChart = new ApexCharts(
+                            document.querySelector("#featureProgressChart"),
+                            self.featureProgressChartOptions
+                        );
+                        self.featureProgressChart.render();
+                    });
+                }
             }
 
             /**
@@ -1114,7 +1125,7 @@ angular.module('hopsWorksApp')
                 var quote = Math.round((self.quotas.featurestoreHdfsUsageInBytes / self.quotas.featurestoreHdfsQuotaInBytes)*100)
                 var quotaChartOptions = {
                     chart: {
-                        height: 175,
+                        height: 225,
                         type: 'radialBar',
                     },
                     plotOptions: {
@@ -1149,14 +1160,17 @@ angular.module('hopsWorksApp')
              * Renders the featurestore quota chart on the div in the featurestore header with the id "quotaChart"
              */
             self.renderQuotaChart = function () {
-                self.setupQuotaChart();
-                $("#headRow").ready(function () {
-                    self.quotaChart = new ApexCharts(
-                        document.querySelector("#quotaChart"),
-                        self.quotaChartOptions
-                    );
-                    self.quotaChart.render();
-                });
+                if(self.quotaChart == null) {
+                    console.log("render quota plot")
+                    self.setupQuotaChart();
+                    $("#headRow").ready(function () {
+                        self.quotaChart = new ApexCharts(
+                            document.querySelector("#quotaChart"),
+                            self.quotaChartOptions
+                        );
+                        self.quotaChart.render();
+                    });
+                }
             }
 
             /**
