@@ -55,6 +55,7 @@ angular.module('hopsWorksApp')
             self.featuregroupsLoaded = false;
             self.jobsLoaded = false;
             self.trainingDatasetsLoaded = false;
+            self.quotaLoaded = false;
             self.tourService = TourService;
             self.tourService.currentStep_TourNine = 0; //Feature store tour
             self.featureSearchResult = null;
@@ -69,6 +70,10 @@ angular.module('hopsWorksApp')
             self.numRecentFeJobs = 10
             self.quotaChartOptions = null;
             self.quotaChart = null;
+            self.quotas = null;
+            self.featureProgressChartOptions = null;
+            self.featureProgressChart = null;
+            self.numFeatureProgressChartDataPoints = 5;
 
             /**
              * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
@@ -115,7 +120,8 @@ angular.module('hopsWorksApp')
              * Function to stop the loading screen
              */
             self.stopLoading = function () {
-                if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded) {
+                if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded && self.quotaLoaded) {
+                    self.renderFeatureProgressChart();
                     self.renderQuotaChart();
                     self.setFeatureEngineeringJobs();
                     self.loading = false;
@@ -504,6 +510,7 @@ angular.module('hopsWorksApp')
                             description: self.featuregroups[i].features[j].description,
                             primary: self.featuregroups[i].features[j].primary,
                             featuregroup: self.featuregroups[i].name,
+                            date: self.featuregroups[i].created,
                             version: self.featuregroups[i].version,
                             idx: i + 1
                         })
@@ -641,6 +648,73 @@ angular.module('hopsWorksApp')
             };
 
             /**
+             * Gets the feature store Quota from Hopsworks
+             */
+            self.getFeaturestoreQuota = function () {
+                self.quotaLoaded = false
+                ProjectService.get({}, {'id': self.projectId}).$promise.then(
+                    function (success) {
+                        self.quotas = success.quotas;
+                        self.quotaLoaded = true
+                        self.stopLoading()
+                    }, function (error) {
+                        self.quotaLoaded = true
+                        self.stopLoading()
+                        growl.error(error.data.errorMsg, {title: 'Failed to fetch featurestore quota', ttl: 15000});
+                    }
+                );
+            }
+
+            /**
+             * Gets the featurestore HDFS usage (how many bytes of storage is being used)
+             *
+             * @returns {null if quota have not been fetched, otherwise the usage in a readable string}
+             */
+            self.featurestoreHdfsUsage = function () {
+                if (self.quotas !== null) {
+                    return convertSize(self.quotas.featurestoreHdfsUsageInBytes);
+                }
+                return null;
+            };
+
+            /**
+             * Gets the featurestore HDFS quota (how many bytes of storage is allowed)
+             *
+             * @returns {null if quota have not been fetched, otherwise the quota in a readable string}
+             */
+            self.featurestoreHdfsQuota = function () {
+                if (self.quotas !== null) {
+                    return convertSize(self.quotas.featurestoreHdfsQuotaInBytes);
+                }
+                return null;
+            };
+
+            /**
+             * Gets the featurestore files count (how many inodes are stored in the feature store)
+             *
+             * @returns {null if quota have not been fetched, otherwise the number of files}
+             */
+            self.featurestoreHdfsNsCount = function () {
+                if (self.quotas !== null) {
+                    return self.quotas.featurestoreHdfsNsCount;
+                }
+                return null;
+            };
+
+            /**
+             * Gets the featurestore HDFS number of files quota (how many inodes is allowed in the featurestore)
+             *
+             * @returns {null if quota have not been fetched, otherwise the quota}
+             */
+            self.featurestoreHdfsNsQuota = function () {
+                if (self.quotas !== null) {
+                    return self.quotas.featurestoreHdfsNsQuota;
+                }
+                return null;
+            };
+
+
+            /**
              * Called when a new featurestore is selected in the dropdown list in the UI
              *
              * @param featurestore the selected featurestore
@@ -674,7 +748,7 @@ angular.module('hopsWorksApp')
                 self.startLoading("Loading Feature store data...");
                 self.getFeaturestores();
                 self.getAllJobs();
-                self.setupQuotaChart();
+                self.getFeaturestoreQuota();
             };
 
             /**
@@ -742,13 +816,44 @@ angular.module('hopsWorksApp')
                     // to get a value that is either negative, positive, or zero.
                     a = new Date(a.submissionTime);
                     b = new Date(b.submissionTime);
-                    return b-a
+                    return b - a
                 });
                 if (matched_jobs.length > self.numRecentFeJobs) {
                     self.fe_jobs = matched_jobs.slice(0, self.numRecentFeJobs)
                 } else {
                     self.fe_jobs = matched_jobs
                 }
+            }
+
+            /**
+             * Get range of days for the featureProgressPlot
+             *
+             * @param startDate the startDate of the range
+             * @param endDate the endDate of the range
+             * @param dateFormat the format (string)
+             * @param interval the inverval between the dates in the range
+             * @param maxDays the max number of days in the range
+             * @returns {*}
+             */
+            self.getDateRange = function (startDate, endDate, dateFormat, interval, maxDays) {
+                var dates = []
+                var end = moment(endDate)
+                var start = moment(startDate)
+                var diff = end.diff(start, 'days');
+                if(!start.isValid() || !end.isValid() || diff <= 0) {
+                    return dates;
+                }
+                dates.push({"formatted": start.format(dateFormat), "raw": start.toDate()});
+                for(var i = 0; i < (diff/interval); i++) {
+                    if(dates.length < maxDays){
+                        dates.push({"formatted": start.add(interval,'d').format(dateFormat), "raw": start.toDate()});
+                    }
+                }
+
+                if(dates.length > 0) {
+                    dates[dates.length-1] = {"formatted": end.format(dateFormat), "raw": end.toDate()}
+                }
+                return dates;
             }
 
             /**
@@ -860,7 +965,153 @@ angular.module('hopsWorksApp')
                 });
             };
 
-            self.setupQuotaChart = function() {
+            /**
+             * Calculate date interval for the featureProgressPlot
+             *
+             * @param numDates number of dates the plot should have
+             * @param daysBetween daysbetween the first feature was inserted into the featurestore and the current date
+             * @returns {the interval}
+             */
+            self.getDateInterval = function(numDates, daysBetween) {
+                if(daysBetween <= numDates){
+                    return 1
+                } else {
+                    return Math.floor(daysBetween/numDates)
+                }
+            }
+
+            /**
+             * Get days between two javascript dates
+             *
+             * @param date1
+             * @param date2
+             * @returns {number of days between}
+             */
+            self.daysBetween = function( date1, date2 ) {
+                //Get 1 day in milliseconds
+                var one_day=1000*60*60*24;
+
+                // Convert both dates to milliseconds
+                var date1_ms = date1.getTime();
+                var date2_ms = date2.getTime();
+
+                // Calculate the difference in milliseconds
+                var difference_ms = date2_ms - date1_ms;
+
+                // Convert back to days and return
+                return Math.round(difference_ms/one_day);
+            }
+
+            /**
+             * Calculates an estimate of the number of features in the featurestore at a specific date based on the
+             * date the list of features were inserted/created.
+             *
+             * @param day the date to base the calculation on
+             */
+            self.getFeatureProgressChartCounts = function(day) {
+                var count = 0
+                for (var i = 0; i < self.features.length; i++) {
+                    if(new Date(self.features[i].date) <= day) {
+                        count = count + 1
+                    }
+                }
+                return count
+            }
+
+
+            /**
+             * Setups the configuration of the feature progress in the header in the featurestore UI
+             */
+            self.setupFeatureProgressChart = function() {
+                var today = new Date()
+                self.features.sort(function (a, b) {
+                    // subtract dates
+                    // to get a value that is either negative, positive, or zero.
+                    a = new Date(a.submissionTime);
+                    b = new Date(b.submissionTime);
+                    return a - b
+                });
+                var daysLabels = []
+                var daysValues = []
+                if(self.features.length > 0) {
+                    var daysBetween = self.daysBetween(new Date(self.features[0].date), today)
+                    var interval = self.getDateInterval(self.numFeatureProgressChartDataPoints, daysBetween)
+                    var days = self.getDateRange(new Date(self.features[0].date), today, "DD-MM-YY",
+                        interval, self.numFeatureProgressChartDataPoints)
+                    for (var i = 0; i < days.length; i++) {
+                        daysLabels.push(days[i].formatted)
+                        daysValues.push(self.getFeatureProgressChartCounts(days[i].raw))
+                    }
+                } else {
+                    daysLabels.push(moment(new Date()))
+                    daysValues.push(0)
+                    for (var i = 0; i < self.numFeatureProgressChartDataPoints; i++) {
+                        //daysLabels.push()
+                    }
+                }
+
+                var featureProgressChartOptions = {
+                    chart: {
+                        height: 150,
+                        type: 'line',
+                        zoom: {
+                            enabled: false
+                        },
+                        toolbar: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        tickAmount: 2
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'straight'
+                    },
+                    series: [{
+                        name: "Features",
+                        data: daysValues
+                    }],
+                    grid: {
+                        row: {
+                            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                            opacity: 0.5
+                        },
+                    },
+                    xaxis: {
+                        categories: daysLabels,
+                        labels: {
+                            rotate: -35,
+                            rotateAlways: true
+                        }
+                    },
+                    colors: ["#111"],
+                }
+                self.featureProgressChartOptions = featureProgressChartOptions
+            }
+
+            /**
+             * Renders the feature progress chart on the div in the featurestore header with the id
+             * "featureProgressChart"
+             */
+            self.renderFeatureProgressChart = function () {
+                self.setupFeatureProgressChart();
+                $("#headRow").ready(function () {
+                    self.featureProgressChart = new ApexCharts(
+                        document.querySelector("#featureProgressChart"),
+                        self.featureProgressChartOptions
+                    );
+                    self.featureProgressChart.render();
+                });
+            }
+
+            /**
+             * Setups the configuration of the quota chart in the header in the featurestore UI
+             */
+            self.setupQuotaChart = function () {
+                var quote = Math.round((self.quotas.featurestoreHdfsUsageInBytes / self.quotas.featurestoreHdfsQuotaInBytes)*100)
                 var quotaChartOptions = {
                     chart: {
                         height: 175,
@@ -887,14 +1138,18 @@ angular.module('hopsWorksApp')
                     stroke: {
                         lineCap: "round",
                     },
-                    colors:["#111"],
-                    series: [70],
+                    colors: ["#111"],
+                    series: [quote],
                     labels: ['Quota'],
                 }
                 self.quotaChartOptions = quotaChartOptions
             }
 
-            self.renderQuotaChart = function() {
+            /**
+             * Renders the featurestore quota chart on the div in the featurestore header with the id "quotaChart"
+             */
+            self.renderQuotaChart = function () {
+                self.setupQuotaChart();
                 $("#headRow").ready(function () {
                     self.quotaChart = new ApexCharts(
                         document.querySelector("#quotaChart"),
@@ -918,30 +1173,6 @@ angular.module('hopsWorksApp')
                     }
                 }
                 return jobFoundBool
-            };
-
-            self.toTitleCase = function (str) {
-                return str.replace(/\w\S*/g, function (txt) {
-                    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-                }).replace(/_/g, ' ');
-            };
-
-            $scope.convertMS = function (ms) {
-                if (typeof ms === 'undefined') {
-                    return "";
-                }
-                var m, s;
-                s = Math.floor(ms / 1000);
-                m = Math.floor(s / 60);
-                s = s % 60;
-                if (s.toString().length < 2) {
-                    s = '0' + s;
-                }
-                if (m.toString().length < 2) {
-                    m = '0' + m;
-                }
-                var ret = m + ":" + s;
-                return ret;
             };
 
             self.init()

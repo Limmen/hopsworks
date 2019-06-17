@@ -21,17 +21,17 @@
 </div>
 <div class="modal-body" style="overflow: auto">
   <div class="row">
-    <table class="table table-hover" style="margin-left: 10px; overflow: auto">
-      <tbody class="table-hover">
-      <tr data-ng-repeat="row in trainingDatasetViewInfoCtrl.table">
-        <td style="font-weight:700;">{{row.property}}</td>
-        <td ng-if="trainingDatasetViewInfoCtrl.isRegularRow(row.property)">{{row.value}}</td>
-        <td ng-if="row.property == 'API Retrieval Code'" style="white-space: pre-wrap">
+    <table class="table table-hover fs-table" style="margin-left: 10px; overflow: auto">
+      <tbody class="table-hover fs-table">
+      <tr data-ng-repeat="row in trainingDatasetViewInfoCtrl.table" class="fs-table">
+        <td style="font-weight:700;" class="fs-table">{{row.property}}</td>
+        <td class="fs-table" ng-if="trainingDatasetViewInfoCtrl.isRegularRow(row.property)">{{row.value}}</td>
+        <td class="fs-table" ng-if="row.property == 'API Retrieval Code'" style="white-space: pre-wrap">
 <pre>
 <code>{{row.value}}</code>
 </pre>
         </td>
-          <td ng-if="row.property == 'Last Computed'">
+          <td ng-if="row.property == 'Last Computed'" class="fs-table">
               <div ng-if="trainingDatasetViewInfoCtrl.trainingDataset.lastComputed === null">
                   -
               </div>
@@ -59,7 +59,7 @@
               </div>
           </td>
 
-          <td ng-if="row.property == 'Job'">
+          <td ng-if="row.property == 'Job'" class="fs-table">
               <div ng-if="trainingDatasetViewInfoCtrl.trainingDataset.jobName === null">
                   no job specified
               </div>
@@ -77,11 +77,12 @@
               </div>
           </td>          
       </tr>
-      <tr>
-          <td style="font-weight:700;">
+      <tr class="fs-table">
+          <td style="font-weight:700;" class="fs-table">
               Size
           </td>
-          <td>{{trainingDatasetViewInfoCtrl.size}}
+          <td class="fs-table">
+              {{trainingDatasetViewInfoCtrl.size}}
               <i ng-if="trainingDatasetViewInfoCtrl.sizeWorking" style="margin-top: 2px; text-align: center"
                  class="fa fa-spinner fa-spin"></i>
           </td>

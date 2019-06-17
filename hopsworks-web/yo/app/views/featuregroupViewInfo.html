@@ -22,13 +22,13 @@
 </div>
 <div class="modal-body" style="overflow: auto">
     <div class="row">
-        <table class="table table-hover" style="margin-left: 10px; overflow: auto">
-            <tbody>
-            <tr data-ng-repeat="row in featuregroupViewInfoCtrl.table">
-                <td style="font-weight:700;">{{row.property}}</td>
-                <td ng-if="featuregroupViewInfoCtrl.isRegularRow(row.property)">{{row.value}}</td>
+        <table class="table table-hover fs-table" style="margin-left: 10px; overflow: auto">
+            <tbody class="fs-table">
+            <tr data-ng-repeat="row in featuregroupViewInfoCtrl.table" class="fs-table">
+                <td style="font-weight:700;" class="fs-table">{{row.property}}</td>
+                <td class="fs-table" ng-if="featuregroupViewInfoCtrl.isRegularRow(row.property)">{{row.value}}</td>
 
-                <td ng-if="row.property == 'Last Computed'">
+                <td ng-if="row.property == 'Last Computed'" class="fs-table">
                     <div ng-if="featuregroupViewInfoCtrl.featuregroup.lastComputed === null">
                         -
                     </div>
@@ -56,7 +56,7 @@
                     </div>
                 </td>
 
-                <td ng-if="row.property == 'Job'">
+                <td ng-if="row.property == 'Job'" class="fs-table">
                     <div ng-if="featuregroupViewInfoCtrl.featuregroup.jobName === null">
                         no job specified
                     </div>
@@ -73,17 +73,17 @@
                       </span>
                     </div>
                 </td>
-                <td ng-if="row.property == 'API Retrieval Code'" style="white-space: pre-wrap">
+                <td ng-if="row.property == 'API Retrieval Code'" style="white-space: pre-wrap" class="fs-table">
 <pre>
 <code>{{row.value}}</code>
 </pre>
                 </td>
             </tr>
-            <tr>
-                <td style="font-weight:700;">
+            <tr class="fs-table">
+                <td style="font-weight:700;" class="fs-table">
                     SQL Schema
                 </td>
-                <td>
+                <td class="fs-table">
 <pre>
 <code>{{featuregroupViewInfoCtrl.schema}}</code>
 </pre>
@@ -91,11 +91,11 @@
                        class="fa fa-spinner fa-spin"></i>
                 </td>
             </tr>
-            <tr>
+            <tr class="fs-table">
                 <td style="font-weight:700;">
                     Size
                 </td>
-                <td>
+                <td class="fs-table">
                     {{featuregroupViewInfoCtrl.size}}
                     <i ng-if="featuregroupViewInfoCtrl.sizeWorking" style="margin-top: 2px; text-align: center;"
                        class="fa fa-spinner fa-spin"></i>
@@ -104,5 +104,4 @@
             </tbody>
         </table>
     </div>
-
 </div>

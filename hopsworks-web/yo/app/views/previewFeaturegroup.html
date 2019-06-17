@@ -31,16 +31,16 @@
         </p>
     </div>
     <div>
-        <table class="table table-hover" style="margin-left: 10px; overflow: auto"
+        <table class="table table-hover fs-table" style="margin-left: 10px; overflow: auto"
                ng-if="previewFeaturegroupCtrl.sampleColumns.length > 0">
-            <thead style="border:none;">
-            <th ng-repeat="col in previewFeaturegroupCtrl.sampleColumns  track by $index">
+            <thead style="border:none;" class="fs-table">
+            <th class="fs-table" ng-repeat="col in previewFeaturegroupCtrl.sampleColumns  track by $index">
                 {{col}}
             </th>
             </thead>
-            <tbody>
-            <tr dir-paginate="row in previewFeaturegroupCtrl.sample| itemsPerPage:pageSize track by $index">
-                <td ng-repeat="col in previewFeaturegroupCtrl.sampleColumns track by $index">
+            <tbody class="fs-table">
+            <tr dir-paginate="row in previewFeaturegroupCtrl.sample| itemsPerPage:pageSize track by $index" class="fs-table">
+                <td ng-repeat="col in previewFeaturegroupCtrl.sampleColumns track by $index" class="fs-table">
                     {{row[col]}}
                 </td>
             </tr>

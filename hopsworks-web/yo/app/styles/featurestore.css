@@ -377,7 +377,7 @@ a.fs_card.bg-inverse:focus, a.fs_card.bg-inverse:hover {
 }
 
 
-.table {
+table {
     width: 100%;
     max-width: 100%;
     margin-bottom: 1rem
@@ -521,9 +521,6 @@ a.fs_card.bg-inverse:focus, a.fs_card.bg-inverse:hover {
 }
 
 
-
-
-body,
 .card {
     overflow: hidden;
 }
