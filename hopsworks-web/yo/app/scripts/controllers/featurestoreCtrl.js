@@ -76,6 +76,8 @@ angular.module('hopsWorksApp')
             self.featureProgressChart = null;
             self.numFeatureProgressChartDataPoints = 5;
             self.hasSearched = false
+            self.featureStoragePieOptions = null;
+            self.featureStoragePieChart = null;
 
             /**
              * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
@@ -109,9 +111,13 @@ angular.module('hopsWorksApp')
                 self.loadingText = label;
             };
 
+            /**
+             * Callback when the user switched to the 'overview' tab
+             */
             self.overviewTab = function () {
                 self.renderFeatureProgressChart()
                 self.renderQuotaChart()
+                self.renderPieChart()
             };
 
 
@@ -1031,6 +1037,84 @@ angular.module('hopsWorksApp')
                 return count
             }
 
+            self.renderPieChart = function() {
+                if(self.featureStoragePieChart != null) {
+                    self.featureStoragePieChart.destroy()
+                    self.featureStoragePieChart = null;
+                    self.featureStoragePieChart = new ApexCharts(
+                        document.querySelector("#featureStoragePie"),
+                        self.featureStoragePieOptions
+                    );
+                    self.featureStoragePieChart.render();
+                }
+                if(self.featureStoragePieChart == null) {
+                    self.setupPieChart();
+                    self.featureStoragePieChart = new ApexCharts(
+                        document.querySelector("#featureStoragePie"),
+                        self.featureStoragePieOptions
+                    );
+                    self.featureStoragePieChart.render();
+                }
+            }
+
+            self.setupPieChart = function() {
+                var dataFormats = []
+                for (var i = 0; i < self.featuregroups.length; i++ ) {
+                    dataFormats.push("orc")
+                }
+                for (var i = 0; i < self.trainingDatasets.length; i++ ) {
+                    dataFormats.push(self.trainingDatasets[i].dataFormat)
+                }
+                if(dataFormats.length > 0) {
+                    var result = self.countFrequencies(dataFormats)
+                    var categories = result[0]
+                    var frequencies = result[1]
+                } else {
+                    var categories = ["None"]
+                    var frequencies = [0]
+                }
+                var pieChartOptions = {
+                    chart: {
+                        width: 250,
+                        height:250,
+                        type: 'pie',
+                    },
+                    tooltip: {
+                        fillSeriesColor: false,
+                        onDatasetHover: {
+                            highlightDataSeries: false,
+                        }
+                    },
+                    series: frequencies,
+                    labels: categories,
+                    fill: {
+                        colors: ['#DCDCDC', '#C0C0C0', '#808080', '#696969', '#000000']
+                    },
+                    colors: ['#e6e6e6', '#e6e6e6', '#e6e6e6', '#e6e6e6', '#e6e6e6'],
+                    legend: {
+                        show: false
+                    }
+                }
+                self.featureStoragePieOptions = pieChartOptions
+            }
+
+            self.countFrequencies = function foo(arr) {
+                var a = [], b = [], prev;
+
+                arr.sort();
+                for ( var i = 0; i < arr.length; i++ ) {
+                    if ( arr[i] !== prev ) {
+                        a.push(arr[i]);
+                        b.push(1);
+                    } else {
+                        b[b.length-1]++;
+                    }
+                    prev = arr[i];
+                }
+
+                return [a, b];
+            }
+
 
             /**
              * Setups the configuration of the feature progress in the header in the featurestore UI
@@ -1067,8 +1151,8 @@ angular.module('hopsWorksApp')
 
                 var featureProgressChartOptions = {
                     chart: {
-                        height: 200,
-                        width: 600,
+                        height: 250,
+                        width: 500,
                         type: 'line',
                         zoom: {
                             enabled: false
@@ -1099,7 +1183,7 @@ angular.module('hopsWorksApp')
                     xaxis: {
                         categories: daysLabels
                     },
-                    colors: ["#111"],
+                    colors: ["#555"],
                 }
                 self.featureProgressChartOptions = featureProgressChartOptions
             }
@@ -1109,9 +1193,7 @@ angular.module('hopsWorksApp')
              * "featureProgressChart"
              */
             self.renderFeatureProgressChart = function () {
-                console.log("Rendering feature progress")
                 if(self.featureProgressChart != null) {
-                    console.log("re-render")
                     self.featureProgressChart.destroy()
                     self.featureProgressChart = null;
                     self.featureProgressChart = new ApexCharts(
@@ -1121,7 +1203,6 @@ angular.module('hopsWorksApp')
                     self.featureProgressChart.render();
                 }
                 if(self.featureProgressChart == null) {
-                    console.log("fresh render")
                     self.setupFeatureProgressChart();
                     self.featureProgressChart = new ApexCharts(
                         document.querySelector("#featureProgressChart"),
@@ -1157,7 +1238,7 @@ angular.module('hopsWorksApp')
                     dataLabels: {
                         style: {
                             fontSize: '14px',
-                            colors: ['#111']
+                            colors: ['#555']
                         }
                     },
                     stroke: {
@@ -1174,9 +1255,7 @@ angular.module('hopsWorksApp')
              * Renders the featurestore quota chart on the div in the featurestore header with the id "quotaChart"
              */
             self.renderQuotaChart = function () {
-                console.log("quota chart render")
                 if(self.quotaChart != null) {
-                    console.log("quota chart re-render")
                     self.quotaChart.destroy()
                     self.quotaChart = null;
                     self.quotaChart = new ApexCharts(
@@ -1186,8 +1265,6 @@ angular.module('hopsWorksApp')
                     self.quotaChart.render();
                 }
                 if(self.quotaChart == null) {
-                    console.log("quota chart fresh render")
-                    console.log("render quota plot")
                     self.setupQuotaChart();
                     self.quotaChart = new ApexCharts(
                         document.querySelector("#quotaChart"),

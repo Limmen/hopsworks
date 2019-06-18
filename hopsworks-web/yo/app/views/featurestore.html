@@ -50,7 +50,7 @@
                         </div>
                         <div class="col-sm-6 col-md-6 col-lg-6">
                             <div class="dropdown" style="z-index: 102; position:relative;
-                            float:right;margin-right:40px">
+                            float:right;margin-right:90px">
                                 <button type="button"
                                         class="btn btn-default btn-success control-label"
                                         id="createNewFg"
@@ -74,7 +74,8 @@
                             <th style="width: 40%" ng-click="featurestoreCtrl.sort('name')"
                                 class="fs-table">
                                 Name
-                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'name'"
+                                <span class="glyphicon sort-icon"
+                                      ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'name'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.reverse,'glyphicon-chevron-down':!featurestoreCtrl.reverse}"></span>
                             </th>
                             <th style="width: 40%" ng-click="featurestoreCtrl.sort('type')"
@@ -84,7 +85,8 @@
                                    uib-tooltip="The type of the entity.
                                    A Feature Group is a logical grouping of features and a Training Dataset is an immutable snapshot of a set of features for machine learning experiments."
                                    style="margin-left: 10px"></i>
-                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'type'"
+                                <span class="glyphicon sort-icon"
+                                      ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'type'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.reverse,'glyphicon-chevron-down':!featurestoreCtrl.reverse}"></span>
                             </th>
                             <th style="width: 10%" class="fs-table">
@@ -217,7 +219,7 @@
                     <div>
                         <div class="fs_card card-deck-wrapper mb-3 feature-search margin-left">
                             <div class="row">
-                                <div class="col-sm-3" style="margin-top:35px">
+                                <div class="col-sm-3">
                                     <form class="form-inline mr-auto">
                                         <input class="form-control mr-sm-2 f-search-input" type="text"
                                                placeholder="Search"
@@ -226,7 +228,7 @@
                                         >
                                         <button class="btn btn-unique btn-rounded btn-sm my-0"
                                                 ng-click="featurestoreCtrl.featureSearch(featurestoreCtrl.featureSearchQuery); $event.stopPropagation();"
-                                                style="color:#555; background-color: rgba(0, 0, 0, 0.25)">
+                                                style="color:white; background-color: rgba(0, 0, 0, 0.25); font-size:16px; font-family: 'Source Sans Pro',sans-serif; font-weight:bold">
                                             Search
                                         </button>
                                     </form>
@@ -320,7 +322,7 @@
                                                          aria-labelledby="apiHeading">
 <pre>
 <code>
-    {{featurestoreCtrl.getCode(featurestoreCtrl.featureSearchResult)}}
+{{featurestoreCtrl.getCode(featurestoreCtrl.featureSearchResult)}}
 </code>
 </pre>
                                                     </div>
@@ -413,7 +415,8 @@
                                             <th style="width: 80%" ng-click="featurestoreCtrl.sortFeature('name')"
                                                 class="fs-table">
                                                 Feature
-                                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featuresSortKey == 'name'"
+                                                <span class="glyphicon sort-icon"
+                                                      ng-show="featurestoreCtrl.featuresSortKey == 'name'"
                                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuresReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuresReverse}"></span>
                                             </th>
                                             <th style="width: 20%" class="fs-table">
@@ -427,16 +430,16 @@
                                                 pagination-id="featurestable"
                                                 current-page="featurestoreCtrl.currentPage"
                                                 class="fs-table"
+                                                ng-click="featurestoreCtrl.featureSearch(feature.name)"
                                         >
-                                            <td class="fs-table">
-                                            <span style="cursor:pointer;color:#555;"
-                                                  ng-click="featurestoreCtrl.featureSearch(feature.name)">
+                                                <td class="fs-table">
+                                            <span style="cursor:pointer;color:#555;">
                                                 {{feature.name}}
                                             </span>
-                                            </td>
-                                            <td class="fs-table">
-                                                {{feature.version}}
-                                            </td>
+                                                </td>
+                                                <td class="fs-table">
+                                                    {{feature.version}}
+                                                </td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -458,6 +461,12 @@
                         <h2 style="margin-bottom: 30px; color:#555">
                             Feature Store Overview
                         </h2>
+                        <div class="row" id="headRow2">
+                            <small class="text-muted" style="margin-left:20px;">
+                                Last updated
+                                <time am-time-ago="featurestoreCtrl.date"></time>
+                            </small>
+                        </div>
                         <div class="row" id="headRow">
                             <div class="col-sm-4">
                                 <div class="fs_card card card-inverse card-success">
@@ -469,6 +478,13 @@
                                             {{featurestoreCtrl.features.length}}</h1>
                                     </div>
                                 </div>
+                                <div id="featureProgressChart">
+                                </div>
+                                <div>
+                                    <small class="text-muted" style="margin-left:20px;">
+                                        Number of features over time.
+                                    </small>
+                                </div>
                             </div>
                             <div class="col-sm-4">
                                 <div class="fs_card card card-inverse card-info">
@@ -479,6 +495,17 @@
                                         <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
                                             {{featurestoreCtrl.featuregroups.length}}</h1>
                                     </div>
+                                </div>
+                                <div id="quotaChart"
+                                     ng-if="featurestoreCtrl.featurestoreHdfsQuota() != null"
+                                     style="margin-left:150px">
+                                </div>
+                                <div style="margin-top:40px">
+                                    <small class="text-muted" ng-if="featurestoreCtrl.featurestoreHdfsQuota() != null"
+                                           style="margin-left:200px;">
+                                        {{featurestoreCtrl.featurestoreHdfsUsage()}} of
+                                        {{featurestoreCtrl.featurestoreHdfsQuota()}} used.
+                                    </small>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -492,37 +519,13 @@
                                             {{featurestoreCtrl.trainingDatasets.length}}</h1>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row" id="headRow2">
-                            <small class="text-muted" style="margin-left:20px;">
-                                Last updated
-                                <time am-time-ago="featurestoreCtrl.date"></time>
-                            </small>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-8" style="max-height:400px;">
-                                <div id="featureProgressChart">
+                                <div id="featureStoragePie">
                                 </div>
-                            </div>
-                            <div class="col-sm-4" style="max-width:250px; max-height:200px">
-                                <div id="quotaChart"
-                                     ng-if="featurestoreCtrl.featurestoreHdfsQuota() != null">
+                                <div style="margin-left:80px; margin-top:15px;">
+                                    <small class="text-muted">
+                                        Storage formats.
+                                    </small>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <small class="text-muted" style="margin-left:20px;">
-                                    Number of features over time.
-                                </small>
-                            </div>
-                            <div class="col-sm-4">
-                                <small class="text-muted" ng-if="featurestoreCtrl.featurestoreHdfsQuota() != null"
-                                       style="margin-left:50px;">
-                                    {{featurestoreCtrl.featurestoreHdfsUsage()}} of
-                                    {{featurestoreCtrl.featurestoreHdfsQuota()}} used
-                                </small>
                             </div>
                         </div>
                     </div>
@@ -555,7 +558,7 @@
                                     margin-left:5px;">
                                             <ui-select ng-model="featurestoreCtrl.featurestore"
                                                        on-select="featurestoreCtrl.onSelectFeaturestoreCallback($item)"
-                                                       style="z-index: 101"
+                                                       style="z-index: 1"
                                                        id="selectFeaturestore"
                                             >
                                                 <ui-select-match placeholder="Select a feature store">

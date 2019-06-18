@@ -821,3 +821,33 @@ td.text-right.fs_stats {
     font-weight: 700;
     color: #555;
 }
+
+#featurestoragepie .apexcharts-tooltip {
+    background-color: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+}
+
+.storagePie.apexcharts-tooltip {
+    background-color: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+}
+
+.storagePie.apexcharts-tooltip-series-group {
+    background-color: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+}
+
+.apexcharts-tooltip-series-group.active {
+    background-color: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+}
+
+#featurestoragepie .apexcharts-tooltip-series-group.active {
+    background-color: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+}
