@@ -75,9 +75,6 @@ angular.module('hopsWorksApp')
             self.featureProgressChartOptions = null;
             self.featureProgressChart = null;
             self.numFeatureProgressChartDataPoints = 5;
-            self.showData = 1;
-            self.showOverview = -1;
-            self.showFeatureSearch = -1;
             self.hasSearched = false
 
             /**
@@ -112,6 +109,12 @@ angular.module('hopsWorksApp')
                 self.loadingText = label;
             };
 
+            self.overviewTab = function () {
+                self.renderFeatureProgressChart()
+                self.renderQuotaChart()
+            };
+
+
             /**
              * Function to get the current index in the paginated features table
              *
@@ -126,8 +129,8 @@ angular.module('hopsWorksApp')
              */
             self.stopLoading = function () {
                 if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded && self.quotaLoaded) {
-                    self.renderFeatureProgressChart();
-                    self.renderQuotaChart();
+                    //self.renderFeatureProgressChart();
+                    //self.renderQuotaChart();
                     self.setFeatureEngineeringJobs();
                     self.loading = false;
                     self.loadingText = "";
@@ -1065,6 +1068,7 @@ angular.module('hopsWorksApp')
                 var featureProgressChartOptions = {
                     chart: {
                         height: 200,
+                        width: 600,
                         type: 'line',
                         zoom: {
                             enabled: false
@@ -1105,16 +1109,25 @@ angular.module('hopsWorksApp')
              * "featureProgressChart"
              */
             self.renderFeatureProgressChart = function () {
+                console.log("Rendering feature progress")
+                if(self.featureProgressChart != null) {
+                    console.log("re-render")
+                    self.featureProgressChart.destroy()
+                    self.featureProgressChart = null;
+                    self.featureProgressChart = new ApexCharts(
+                        document.querySelector("#featureProgressChart"),
+                        self.featureProgressChartOptions
+                    );
+                    self.featureProgressChart.render();
+                }
                 if(self.featureProgressChart == null) {
-                    console.log("render feature plot")
+                    console.log("fresh render")
                     self.setupFeatureProgressChart();
-                    $("#headRow").ready(function () {
-                        self.featureProgressChart = new ApexCharts(
-                            document.querySelector("#featureProgressChart"),
-                            self.featureProgressChartOptions
-                        );
-                        self.featureProgressChart.render();
-                    });
+                    self.featureProgressChart = new ApexCharts(
+                        document.querySelector("#featureProgressChart"),
+                        self.featureProgressChartOptions
+                    );
+                    self.featureProgressChart.render();
                 }
             }
 
@@ -1126,6 +1139,7 @@ angular.module('hopsWorksApp')
                 var quotaChartOptions = {
                     chart: {
                         height: 225,
+                        width:225,
                         type: 'radialBar',
                     },
                     plotOptions: {
@@ -1160,16 +1174,26 @@ angular.module('hopsWorksApp')
              * Renders the featurestore quota chart on the div in the featurestore header with the id "quotaChart"
              */
             self.renderQuotaChart = function () {
+                console.log("quota chart render")
+                if(self.quotaChart != null) {
+                    console.log("quota chart re-render")
+                    self.quotaChart.destroy()
+                    self.quotaChart = null;
+                    self.quotaChart = new ApexCharts(
+                        document.querySelector("#quotaChart"),
+                        self.quotaChartOptions
+                    );
+                    self.quotaChart.render();
+                }
                 if(self.quotaChart == null) {
+                    console.log("quota chart fresh render")
                     console.log("render quota plot")
                     self.setupQuotaChart();
-                    $("#headRow").ready(function () {
-                        self.quotaChart = new ApexCharts(
-                            document.querySelector("#quotaChart"),
-                            self.quotaChartOptions
-                        );
-                        self.quotaChart.render();
-                    });
+                    self.quotaChart = new ApexCharts(
+                        document.querySelector("#quotaChart"),
+                        self.quotaChartOptions
+                    );
+                    self.quotaChart.render();
                 }
             }
 

@@ -20,13 +20,13 @@
         <div class="overlay"></div>
         <div ng-include="'navProject.html'"></div>
         <div class="content-wrapper">
-            <div ng-if="featurestoreCtrl.loading" class="loadingwrap" style="z-index: 102">
+            <div ng-if="featurestoreCtrl.loading" class="loadingwrap" style="z-index: 105">
                 <div class="loading-content">
                     <div class="loader-in-wrap"></div>
                     {{featurestoreCtrl.loadingText}}
                 </div>
             </div>
-            <uib-tabset active="2">
+            <uib-tabset active="0">
                 <uib-tab index="0" heading="Feature Groups & Training Datasets"
                          class="fs-tab">
 
@@ -49,6 +49,22 @@
                             </label>
                         </div>
                         <div class="col-sm-6 col-md-6 col-lg-6">
+                            <div class="dropdown" style="z-index: 102; position:relative; 
+                            float:right;margin-right:40px">
+                                <button type="button"
+                                        class="btn btn-default btn-success control-label"
+                                        id="createNewFg"
+                                        data-toggle="dropdown"
+                                >
+                                    Create <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a ng-click="featurestoreCtrl.showCreateFeaturegroupForm()">Feature
+                                        Group</a></li>
+                                    <li><a ng-click="featurestoreCtrl.showCreateTrainingDatasetForm()">
+                                        Training Dataset</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -58,14 +74,18 @@
                             <th style="width: 40%" ng-click="featurestoreCtrl.sort('name')"
                                 class="fs-table">
                                 Name
-                                <span class="glyphicon sort-icon"
-                                      ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'name'"
+                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.reverse,'glyphicon-chevron-down':!featurestoreCtrl.reverse}"></span>
                             </th>
                             <th style="width: 40%" ng-click="featurestoreCtrl.sort('type')"
                                 class="fs-table">
                                 Type
-                                <span class="glyphicon sort-icon"
-                                      ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                <i class="fa fa-info-circle" tooltip-placement="auto left"
+                                   uib-tooltip="The type of the entity.
+                                   A Feature Group is a logical grouping of features and a Training Dataset is an immutable snapshot of a set of features for machine learning experiments."
+                                   style="margin-left: 10px"></i>
+                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featurestoreEntitySortKey == 'type'"
+                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.reverse,'glyphicon-chevron-down':!featurestoreCtrl.reverse}"></span>
                             </th>
                             <th style="width: 10%" class="fs-table">
                                 Version
@@ -206,7 +226,7 @@
                                         >
                                         <button class="btn btn-unique btn-rounded btn-sm my-0"
                                                 ng-click="featurestoreCtrl.featureSearch(featurestoreCtrl.featureSearchQuery); $event.stopPropagation();"
-                                        style="color:#555; background-color: rgba(0, 0, 0, 0.25)">
+                                                style="color:#555; background-color: rgba(0, 0, 0, 0.25)">
                                             Search
                                         </button>
                                     </form>
@@ -242,7 +262,7 @@
                                                 <div class="col-sm-7">
                                                     <ui-select ng-model="featurestoreCtrl.selectedSearchFeaturegroup"
                                                                on-select="featurestoreCtrl.onSelectFeaturegroupSearchResultCallback($item.name)"
-                                                               style="z-index: 101"
+                                                               style="z-index: 103"
                                                                id="selectFeatureGroupSearchResult"
                                                     >
                                                         <ui-select-match placeholder="Select a feature group">
@@ -298,11 +318,11 @@
                                                     </div>
                                                     <div id="api" class="fs_card card-block collapse" role="tabpanel"
                                                          aria-labelledby="apiHeading">
-                                                    <pre>
-                                                    <code>
+<pre>
+<code>
     {{featurestoreCtrl.getCode(featurestoreCtrl.featureSearchResult)}}
-                                                    </code>
-                                                    </pre>
+</code>
+</pre>
                                                     </div>
                                                     <div class="fs_card card-header" role="tab" id="featuregroupHeading"
                                                          data-toggle="collapse" data-parent="#accordion"
@@ -390,16 +410,13 @@
                                            ng-if="featurestoreCtrl.features.length > 0">
                                         <thead class="thead-inverse">
                                         <tr class="fs-table">
-                                            <th style="width: 5%" class="fs-table">
-                                                #
-                                            </th>
                                             <th style="width: 80%" ng-click="featurestoreCtrl.sortFeature('name')"
                                                 class="fs-table">
                                                 Feature
-                                                <span class="glyphicon sort-icon"
-                                                      ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!featuresReverse}"></span>
+                                                <span class="glyphicon sort-icon" ng-show="featurestoreCtrl.featuresSortKey == 'name'"
+                                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuresReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuresReverse}"></span>
                                             </th>
-                                            <th style="width: 15%" class="fs-table">
+                                            <th style="width: 20%" class="fs-table">
                                                 Version
                                             </th>
                                         </tr>
@@ -411,9 +428,6 @@
                                                 current-page="featurestoreCtrl.currentPage"
                                                 class="fs-table"
                                         >
-                                            <td class="fs-table">
-                                                {{featurestoreCtrl.getTotalIndex($index)}}
-                                            </td>
                                             <td class="fs-table">
                                             <span style="cursor:pointer;color:#555;"
                                                   ng-click="featurestoreCtrl.featureSearch(feature.name)">
@@ -439,17 +453,17 @@
                         </div>
                     </div>
                 </uib-tab>
-                <uib-tab index="2" heading="Overview" class="fs-tab">
+                <uib-tab index="2" heading="Overview" class="fs-tab" select="featurestoreCtrl.overviewTab()">
                     <div>
                         <h2 style="margin-bottom: 30px; color:#555">
                             Feature Store Overview
                         </h2>
-                        <div class="row" id="#headRow">
+                        <div class="row" id="headRow">
                             <div class="col-sm-4">
                                 <div class="fs_card card card-inverse card-success">
                                     <div class="fs_card card-block bg-success">
                                         <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading"
-                                        style="color:#555">
+                                            style="color:#555">
                                             Features</h5>
                                         <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
                                             {{featurestoreCtrl.features.length}}</h1>
@@ -460,7 +474,7 @@
                                 <div class="fs_card card card-inverse card-info">
                                     <div class="fs_card card-block bg-info">
                                         <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading"
-                                        style="color:#555">
+                                            style="color:#555">
                                             Feature Groups</h5>
                                         <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
                                             {{featurestoreCtrl.featuregroups.length}}</h1>
@@ -480,7 +494,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" id="headRow2">
                             <small class="text-muted" style="margin-left:20px;">
                                 Last updated
                                 <time am-time-ago="featurestoreCtrl.date"></time>
