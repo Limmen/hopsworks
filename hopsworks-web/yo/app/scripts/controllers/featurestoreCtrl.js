@@ -36,20 +36,24 @@ angular.module('hopsWorksApp')
             self.trainingDatasets = [];
             self.featuregroups = [];
             self.jobs = [];
-            self.pageSize = 11;
-            self.featuresPageSize = 10;
+            self.featuregroupsPageSize = 10;
+            self.trainingDatasetsPageSize = 10;
+            self.featuresPageSize = 6;
             self.currentPage = 1;
             self.featurestore;
-            self.featureSearchQuery = "";
-            self.featurestoreEntitySortKey = 'name';
+            self.featureSearchTerm = "";
+            self.featuregroupsSortKey = 'name';
+            self.trainingDatasetsSortKey = 'name';
             self.featuresSortKey = 'name';
-            self.reverse = false;
+            self.featuregroupsReverse = false;
+            self.trainingDatasetsReverse = false;
             self.featuresReverse = false;
-            self.fseFilter = "";
+            self.tdFilter = "";
+            self.fgFilter = "";
+            self.fFilter = "";
             self.firstPull = false;
             self.featuregroupsDictList = [];
             self.trainingDatasetsDictList = [];
-            self.featurestoreEntitiesDictList = [];
             self.loading = false;
             self.loadingText = "";
             self.featuregroupsLoaded = false;
@@ -58,9 +62,6 @@ angular.module('hopsWorksApp')
             self.quotaLoaded = false;
             self.tourService = TourService;
             self.tourService.currentStep_TourNine = 0; //Feature store tour
-            self.featureSearchResult = null;
-            self.featureSearchResultFeaturegroups = []
-            self.selectedSearchFeaturegroup;
             self.featurestoreSizeWorking = false
             self.featurestoreSize = "Not fetched"
             self.featuregroupSizeWorking = false
@@ -75,19 +76,55 @@ angular.module('hopsWorksApp')
             self.featureProgressChartOptions = null;
             self.featureProgressChart = null;
             self.numFeatureProgressChartDataPoints = 5;
-            self.hasSearched = false
             self.featureStoragePieOptions = null;
             self.featureStoragePieChart = null;
+            self.featureSearchFilterForm = false;
+
+            self.setFeatureSearchFilterForm = function() {
+                if(self.featureSearchFilterForm) {
+                    self.featureSearchFilterForm = false;
+                } else {
+                    self.featureSearchFilterForm = true;
+                }
+            }
+
+
+            self.getFeatureTime = function (date) {
+                if(date != null){
+                    return moment(date).format('HH:mm')
+                } else {
+                    return '-'
+                }
+            }
+
+            self.getFeatureDate = function (date) {
+                if(date != null){
+                    return moment(date).format('MMM Do YY')
+                } else {
+                    return '-'
+                }
+            }
 
             /**
-             * Called when clicking the sort-arrow in the UI of featuregroup/training datasets table
+             * Called when clicking the sort-arrow in the UI of featuregroup table
              *
              * @param keyname
              */
-            self.sort = function (keyname) {
+            self.featuregroupsSort = function (keyname) {
                 self.sortKey = keyname;   //set the sortKey to the param passed
-                self.featurestoreEntitySortKey = keyname
-                self.reverse = !self.reverse; //if true make it false and vice versa
+                self.featuregroupsSortKey = keyname
+                self.featuregroupsReverse = !self.featuregroupsReverse; //if true make it false and vice versa
+            };
+
+            /**
+             * Called when clicking the sort-arrow in the UI of training datasets table
+             *
+             * @param keyname
+             */
+            self.trainingDatasetsSort = function (keyname) {
+                self.sortKey = keyname;   //set the sortKey to the param passed
+                self.trainingDatasetsSortKey = keyname
+                self.trainingDatasetsReverse = !self.trainingDatasetsReverse; //if true make it false and vice versa
             };
 
             /**
@@ -134,78 +171,13 @@ angular.module('hopsWorksApp')
              * Function to stop the loading screen
              */
             self.stopLoading = function () {
+                if(self.featuregroupsLoaded && self.trainingDatasetsLoaded) {
+                    self.collectAllFeatures();
+                }
                 if (self.featuregroupsLoaded && self.trainingDatasetsLoaded && self.jobsLoaded && self.quotaLoaded) {
-                    //self.renderFeatureProgressChart();
-                    //self.renderQuotaChart();
                     self.setFeatureEngineeringJobs();
                     self.loading = false;
                     self.loadingText = "";
-                }
-            };
-
-            /**
-             * Search for a feature name
-             */
-            self.featureSearch = function (searchQuery) {
-                self.hasSearched = true
-                self.featureSearchResultFeaturegroups = []
-                self.featureSearchResultFeatures = []
-                for (var i = 0; i < self.features.length; i++) {
-                    if (self.features[i].name == searchQuery) {
-                        var fg = {
-                            "name": self.features[i].featuregroup,
-                            "longName": self.getFeaturegroupSelectName(self.features[i].featuregroup, self.features[i].version),
-                            "featuregroup": self.getFeaturegroupByNameAndVersion(self.features[i].featuregroup, self.features[i].version)
-                        }
-                        self.featureSearchResultFeaturegroups.push(fg)
-                        self.featureSearchResultFeatures.push(self.features[i])
-                    }
-                }
-                if (self.featureSearchResultFeatures.length == 0) {
-                    self.featureSearchResult = "Feature '" + searchQuery + "' not found.";
-                } else {
-                    self.featureSearchResult = self.featureSearchResultFeatures[0]
-                    self.selectedSearchFeaturegroup = self.featureSearchResultFeaturegroups[0]
-                    self.fetchFeaturegroupSize(self.selectedSearchFeaturegroup.featuregroup)
-                }
-            };
-
-            /**
-             * Check whether there exists multiple search results
-             * @returns {boolean}
-             */
-            self.hasMultipleSearchResults = function () {
-                return self.hasFeatureSearchResult() && self.featureSearchResultFeaturegroups.length > 1
-            };
-
-            /**
-             * Reset feature search result
-             */
-            self.resetFeatureSearchResult = function () {
-                self.featureSearchResult = null
-                self.hasSearched = false
-            };
-
-            /**
-             * Check whether feature search result is available
-             */
-            self.hasFeatureSearchResult = function () {
-                if (!self.featureSearchResult || self.featureSearchResult == undefined || self.featureSearchResult == null) {
-                    return false
-                } else {
-                    return true
-                }
-            };
-
-            /**
-             * Check whether feature search result is "not found"
-             */
-            self.featureSearchResultIsNotFound = function () {
-                if (self.hasFeatureSearchResult() && typeof self.featureSearchResult === 'string' &&
-                    self.featureSearchResult.includes("not found")) {
-                    return true;
-                } else {
-                    return false;
                 }
             };
 
@@ -471,7 +443,6 @@ angular.module('hopsWorksApp')
                     function (success) {
                         self.featuregroups = success.data;
                         self.groupFeaturegroupsByVersion();
-                        self.collectAllFeatures();
                         self.featuregroupsLoaded = true;
                         self.stopLoading()
                     },
@@ -528,10 +499,25 @@ angular.module('hopsWorksApp')
                             featuregroup: self.featuregroups[i].name,
                             date: self.featuregroups[i].created,
                             version: self.featuregroups[i].version,
-                            idx: i + 1
+                            entity: "Feature Group"
                         })
                     }
                     featuresTemp = featuresTemp.concat(fgFeatures)
+                }
+                for (i = 0; i < self.trainingDatasets.length; i++) {
+                    var tdFeatures = [];
+                    for (j = 0; j < self.trainingDatasets[i].features.length; j++) {
+                        tdFeatures.push({
+                            name: self.trainingDatasets[i].features[j].name,
+                            type: self.trainingDatasets[i].features[j].type,
+                            description: self.trainingDatasets[i].features[j].description,
+                            trainingDataset: self.trainingDatasets[i].name,
+                            date: self.trainingDatasets[i].created,
+                            version: self.trainingDatasets[i].version,
+                            entity: "Training Dataset"
+                        })
+                    }
+                    featuresTemp = featuresTemp.concat(tdFeatures)
                 }
                 self.features = featuresTemp;
             };
@@ -544,6 +530,7 @@ angular.module('hopsWorksApp')
                 var i;
                 var versionVar;
                 for (i = 0; i < self.featuregroups.length; i++) {
+                    self.featuregroups[i].type = "Managed Table (ORC)"
                     if (self.featuregroups[i].name in dict) {
                         versionVar = self.featuregroups[i].version.toString();
                         dict[self.featuregroups[i].name][versionVar] = self.featuregroups[i]
@@ -562,11 +549,9 @@ angular.module('hopsWorksApp')
                     var versions = Object.keys(item.versionToGroups);
                     item.versions = versions;
                     item.activeVersion = versions[versions.length - 1];
-                    item.type = "Feature Group"
                     dictList.push(item);
                 }
                 self.featuregroupsDictList = dictList
-                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
 
             /**
@@ -595,11 +580,9 @@ angular.module('hopsWorksApp')
                     var versions = Object.keys(item.versionToGroups);
                     item.versions = versions;
                     item.activeVersion = versions[versions.length - 1];
-                    item.type = "Training Dataset"
                     dictList.push(item);
                 }
                 self.trainingDatasetsDictList = dictList
-                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
 
             /**
@@ -739,23 +722,7 @@ angular.module('hopsWorksApp')
                 self.startLoading("Loading Feature store data...");
                 self.getTrainingDatasets(featurestore);
                 self.getFeaturegroups(featurestore);
-                self.featurestoreEntitiesDictList = self.featuregroupsDictList.concat(self.trainingDatasetsDictList)
             };
-
-            /**
-             * Called when a new feature group is selected in the dropdown list in the UI of feature search result
-             *
-             * @param featuregroupName the name of the selected featuregroup
-             */
-            self.onSelectFeaturegroupSearchResultCallback = function (featuregroupName) {
-                for (var i = 0; i < self.featureSearchResultFeatures.length; i++) {
-                    if (self.featureSearchResultFeatures[i].featuregroup == featuregroupName) {
-                        self.featureSearchResult = self.featureSearchResultFeatures[i]
-                        return
-                    }
-                }
-            };
-
 
             /**
              * Initializes the UI by retrieving featurstores from the backend
@@ -1273,6 +1240,18 @@ angular.module('hopsWorksApp')
                     self.quotaChart.render();
                 }
             }
+
+            /**
+             * Opens the modal to view feature information
+             *
+             * @param feature
+             */
+            self.viewFeatureInfo = function (feature) {
+                ModalService.viewFeatureInfo('lg', self.projectId, feature, self.featurestore).then(
+                    function (success) {
+                    }, function (error) {
+                    });
+            };
 
             /**
              * Check if a job of a featuregroup in the featurestore belongs to this project's jobs or another project

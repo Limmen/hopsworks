@@ -659,7 +659,7 @@ table {
 }
 
 .f-search-input {
-    width: 100%
+    width: 90% !important
 }
 
 .fs_top_heading {
@@ -851,3 +851,20 @@ td.text-right.fs_stats {
     background: rgba(0, 0, 0, 0.25);
     color: white;
 }
+
+
+.feature-search-result .thumbnail { border-radius: 0 !important; }
+.feature-search-result:first-child { margin-top: 0 !important; }
+.feature-search-result { margin-top: 20px; }
+.feature-search-result .col-md-2 { border-right: 1px dotted #ccc; min-height: 140px; }
+.feature-search-result ul { padding-left: 0 !important; list-style: none;  }
+.feature-search-result ul li { line-height: 30px; }
+.feature-search-result ul li i { padding-right: 5px; }
+.feature-search-result .col-md-7 { position: relative; }
+.feature-search-result h3 { margin-top: 0 !important; margin-bottom: 10px !important; }
+.feature-search-result h3 > a, .feature-search-result i { color: #555 !important; }
+.feature-search-result span.plus { position: absolute; right: 0; top: 80px; margin-right:20px}
+.feature-search-result span.plus a { background-color: #248dc1; padding: 5px 5px 3px 5px; }
+.feature-search-result span.plus a:hover { background-color: #414141; }
+.feature-search-result span.plus a i { color: #fff !important; }
+.feature-search-result span.border { display: block; width: 97%; margin: 0 15px; border-bottom: 1px dotted #ccc; }
