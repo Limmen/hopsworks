@@ -436,7 +436,7 @@ a.fs_card.bg-inverse:focus, a.fs_card.bg-inverse:hover {
 .feature-search-result h3 { margin-top: 0 !important; margin-bottom: 10px !important; }
 .feature-search-result h3 > a, .feature-search-result i { color: #555 !important; }
 .feature-search-result span.plus { position: absolute; right: 0; top: 80px; margin-right:20px}
-.feature-search-result span.plus a { background-color: #248dc1; padding: 5px 5px 3px 5px; }
+.feature-search-result span.plus a { background-color: rgb(51, 122, 183); padding: 5px 5px 3px 5px; }
 .feature-search-result span.plus a:hover { background-color: #414141; }
 .feature-search-result span.plus a i { color: #fff !important; }
 .feature-search-result span.border { display: block; width: 97%; margin: 0 15px; border-bottom: 1px dotted #ccc; }
