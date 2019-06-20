@@ -95,6 +95,8 @@ angular.module('hopsWorksApp')
             self.searchInTrainingDatasets = true
             self.featuregroupType = "Feature Group"
             self.trainingDatasetType = "Training Dataset"
+            self.featureSearchFgFilter = ""
+            self.featureSearchFgVersionFilter = ""
 
 
             self.setSearchInFeaturegroups = function() {
@@ -102,6 +104,15 @@ angular.module('hopsWorksApp')
                     self.searchInFeaturegroups = false
                 } else {
                     self.searchInFeaturegroups = true
+                }
+            }
+
+
+            self.filterFeaturegroups = function() {
+                if(self.featureSearchFgFilter == ''){
+                    return false
+                } else {
+                    return true
                 }
             }
 

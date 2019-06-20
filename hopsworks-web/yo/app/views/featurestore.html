@@ -427,6 +427,20 @@
                                             Search in Training Datasets
                                         </md-checkbox>
                                         <br>
+                                        <form class="form-inline">
+                                            <div class="form-group">
+                                                Feature Group/Training Dataset Filter:
+                                                <input class="form-control" style="margin-left: 10px"
+                                                       ng-model="featurestoreCtrl.featureSearchFgFilter">
+                                            </div>
+                                        </form>
+                                        <form class="form-inline">
+                                            <div class="form-group">
+                                                Version Filter:
+                                                <input class="form-control" style="margin-left: 154px"
+                                                       ng-model="featurestoreCtrl.featureSearchTdFilter">
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -442,7 +456,7 @@
                                 <div class="search-result-body row thin-scrollbar">
                                     <section class="col-xs-12 col-sm-6 col-md-12">
                                         <div
-                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | dateRangeFilterFeatures : featurestoreCtrl.featuresFromDate : featurestoreCtrl.featuresToDate | filter: (!featurestoreCtrl.searchInFeaturegroups || '') && { entity: '!' + featurestoreCtrl.featuregroupType} | filter: (!featurestoreCtrl.searchInTrainingDatasets || '') && { entity: '!' + featurestoreCtrl.trainingDatasetType} | filter:featurestoreCtrl.fFilter:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
+                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | dateRangeFilterFeatures : featurestoreCtrl.featuresFromDate : featurestoreCtrl.featuresToDate | filter: (!featurestoreCtrl.searchInFeaturegroups || '') && { entity: '!' + featurestoreCtrl.featuregroupType} | filter: (!featurestoreCtrl.searchInTrainingDatasets || '') && { entity: '!' + featurestoreCtrl.trainingDatasetType} | filter:{name:featurestoreCtrl.fFilter}:false | filter:{featuregroup:featurestoreCtrl.featureSearchFgFilter}:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
 
                                             <article class="feature-search-result row">
                                                 <div class="col-xs-12 col-sm-12 col-md-3">
