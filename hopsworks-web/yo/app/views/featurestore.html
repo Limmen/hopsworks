@@ -385,7 +385,7 @@
                                     </label>
                                 </div>
                                 <div class="col-sm-3 form-group"
-                                     ng-if="featurestoreCtrl.fFilter != ''">
+                                     ng-if="featurestoreCtrl.fFilter != '' || featurestoreCtrl.featureSearchFgFilter != '' || featurestoreCtrl.featureSearchFgVersionFilter != ''">
                                     <div class="pull-right btn-group">
                                         <label>Features per page:
                                             <input type="number" min="1"
@@ -438,13 +438,13 @@
                                             <div class="form-group">
                                                 Version Filter:
                                                 <input class="form-control" style="margin-left: 154px"
-                                                       ng-model="featurestoreCtrl.featureSearchTdFilter">
+                                                       ng-model="featurestoreCtrl.featureSearchFgVersionFilter">
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-                            <section class="search-result" ng-if="featurestoreCtrl.fFilter != ''">
+                            <section class="search-result" ng-if="featurestoreCtrl.fFilter != '' || featurestoreCtrl.featureSearchFgFilter != '' || featurestoreCtrl.featureSearchFgVersionFilter != ''">
 
                                 <div class="row search-result-header">
                                     <div class="col-md-11 pull-left">
@@ -456,7 +456,7 @@
                                 <div class="search-result-body row thin-scrollbar">
                                     <section class="col-xs-12 col-sm-6 col-md-12">
                                         <div
-                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | dateRangeFilterFeatures : featurestoreCtrl.featuresFromDate : featurestoreCtrl.featuresToDate | filter: (!featurestoreCtrl.searchInFeaturegroups || '') && { entity: '!' + featurestoreCtrl.featuregroupType} | filter: (!featurestoreCtrl.searchInTrainingDatasets || '') && { entity: '!' + featurestoreCtrl.trainingDatasetType} | filter:{name:featurestoreCtrl.fFilter}:false | filter:{featuregroup:featurestoreCtrl.featureSearchFgFilter}:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
+                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | dateRangeFilterFeatures : featurestoreCtrl.featuresFromDate : featurestoreCtrl.featuresToDate | filter: (!featurestoreCtrl.searchInFeaturegroups || '') && { entity: '!' + featurestoreCtrl.featuregroupType} | filter: (!featurestoreCtrl.searchInTrainingDatasets || '') && { entity: '!' + featurestoreCtrl.trainingDatasetType} | filter:{name:featurestoreCtrl.fFilter}:false | featureSearchFilterByFg:featurestoreCtrl.featureSearchFgFilter:false | featureSearchFilterByFgVersion:featurestoreCtrl.featureSearchFgVersionFilter:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
 
                                             <article class="feature-search-result row">
                                                 <div class="col-xs-12 col-sm-12 col-md-3">

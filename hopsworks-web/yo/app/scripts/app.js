@@ -568,6 +568,38 @@ angular.module('hopsWorksApp', [
             return filtered;
         };
         }])
+        .filter('featureSearchFilterByFg', ['$filter', function() {
+            return function(items, searchText) {
+                var filtered = [];
+                angular.forEach(items, function(item) {
+                    if(item.featuregroup != null) {
+                        if (item.featuregroup.indexOf(searchText) >= 0 ) {
+                            filtered.push(item);
+                        }
+                    } else {
+                        if (item.trainingDataset.indexOf(searchText) >= 0 ) {
+                            filtered.push(item);
+                        }
+                    }
+                });
+                return filtered;
+            };
+        }])
+        .filter('featureSearchFilterByFgVersion', ['$filter', function() {
+            return function(items, searchText) {
+                var filtered = [];
+                angular.forEach(items, function(item) {
+                    if(searchText != ''){
+                        if (item.version.toString() == searchText ) {
+                            filtered.push(item);
+                        }
+                    } else {
+                        filtered.push(item);
+                    }
+                });
+                return filtered;
+            };
+        }])
         .run(['$rootScope', '$routeParams', '$http', function ($rootScope, $routeParams, $http) {
             var token = localStorage.getItem("token");
             if (token) {
