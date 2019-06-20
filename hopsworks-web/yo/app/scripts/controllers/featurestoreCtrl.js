@@ -79,6 +79,14 @@ angular.module('hopsWorksApp')
             self.featureStoragePieOptions = null;
             self.featureStoragePieChart = null;
             self.featureSearchFilterForm = false;
+            self.featuregroupsToDate = new Date();
+            self.featuregroupsToDate.setMinutes(self.featuregroupsToDate.getMinutes() + 60*24);
+            self.featuregroupsFromDate = new Date();
+            self.featuregroupsFromDate.setMinutes(self.featuregroupsFromDate.getMinutes() - 60*24*30*4);
+            self.trainingDatasetsToDate = new Date();
+            self.trainingDatasetsToDate.setMinutes(self.trainingDatasetsToDate.getMinutes() + 60*24);
+            self.trainingDatasetsFromDate = new Date();
+            self.trainingDatasetsFromDate.setMinutes(self.trainingDatasetsFromDate.getMinutes() - 60*24*30*4);
 
             self.setFeatureSearchFilterForm = function() {
                 if(self.featureSearchFilterForm) {
@@ -522,6 +530,29 @@ angular.module('hopsWorksApp')
                 self.features = featuresTemp;
             };
 
+            self.trainingDatasetSortFn = function (td) {
+                if(self.trainingDatasetsSortKey == "created"){
+                    return td.versionToGroups[td.activeVersion].created
+                }
+                if(self.trainingDatasetsSortKey == "dataFormat"){
+                    return td.versionToGroups[td.activeVersion].dataFormat
+                }
+                return td.name
+            }
+
+            self.featuregroupsSortFn = function (featuregroup) {
+                if(self.featuregroupsSortKey == "created"){
+                    return featuregroup.versionToGroups[featuregroup.activeVersion].created
+                }
+                if(self.featuregroupsSortKey == "type"){
+                    return featuregroup.versionToGroups[featuregroup.activeVersion].type
+                }
+                if(self.featuregroupsSortKey == "online"){
+                    return featuregroup.versionToGroups[featuregroup.activeVersion].online
+                }
+                return featuregroup.name
+            }
+
             /**
              * Goes through a list of featuregroups and groups them by name so that you get name --> versions mapping
              */
@@ -531,6 +562,7 @@ angular.module('hopsWorksApp')
                 var versionVar;
                 for (i = 0; i < self.featuregroups.length; i++) {
                     self.featuregroups[i].type = "Managed Table (ORC)"
+                    self.featuregroups[i].online = false
                     if (self.featuregroups[i].name in dict) {
                         versionVar = self.featuregroups[i].version.toString();
                         dict[self.featuregroups[i].name][versionVar] = self.featuregroups[i]
@@ -1239,6 +1271,10 @@ angular.module('hopsWorksApp')
                     );
                     self.quotaChart.render();
                 }
+            }
+
+            self.createdOn = function(dateStr) {
+                return moment(new Date(dateStr)).format('MMMM Do YYYY, h:mm a');
             }
 
             /**

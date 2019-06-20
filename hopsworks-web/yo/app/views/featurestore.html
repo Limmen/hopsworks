@@ -56,6 +56,10 @@
                                 <input class="form-control"
                                        style="margin-left: 10px;"
                                        ng-model="featurestoreCtrl.fgFilter">
+                                <md-datepicker ng-model="featurestoreCtrl.featuregroupsFromDate"
+                                               md-placeholder="From"></md-datepicker>
+                                <md-datepicker ng-model="featurestoreCtrl.featuregroupsToDate"
+                                               md-placeholder="To"></md-datepicker>
                             </label>
                         </div>
                         <div class="col-sm-6 col-md-6 col-lg-6 form-group">
@@ -72,21 +76,37 @@
                     <table class="table table-hover" ng-show="featurestoreCtrl.featuregroupsDictList.length > 0">
                         <thead>
                         <tr>
-                            <th style="width: 40%" ng-click="featurestoreCtrl.featuregroupsSort('name')"
+                            <th style="width: 30%" ng-click="featurestoreCtrl.featuregroupsSort('name')"
                                 class="fs-table">
                                 Name
                                 <span class="glyphicon sort-icon"
                                       ng-show="featurestoreCtrl.featuregroupsSortKey == 'name'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuregroupsReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuregroupsReverse}"></span>
                             </th>
-                            <th style="width: 40%" ng-click="featurestoreCtrl.featuregroupsSort('type')"
+                            <th style="width: 20%" ng-click="featurestoreCtrl.featuregroupsSort('created')"
                                 class="fs-table">
-                                Table Type
+                                Created
+                                <span class="glyphicon sort-icon"
+                                      ng-show="featurestoreCtrl.featuregroupsSortKey == 'created'"
+                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuregroupsReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuregroupsReverse}"></span>
+                            </th>
+                            <th style="width: 20%" ng-click="featurestoreCtrl.featuregroupsSort('type')"
+                                class="fs-table">
+                                Offline Table Type
                                 <i class="fa fa-info-circle" tooltip-placement="auto left"
-                                   uib-tooltip="Feature Groups are stored as Hive Tables."
+                                   uib-tooltip="Offline Feature Groups are stored as Hive Tables."
                                    style="margin-left: 10px"></i>
                                 <span class="glyphicon sort-icon"
                                       ng-show="featurestoreCtrl.featuregroupsSortKey == 'type'"
+                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuregroupsReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuregroupsReverse}"></span>
+                            </th>
+                            <th style="width: 10%" class="fs-table" ng-click="featurestoreCtrl.featuregroupsSort('online')">
+                                Online
+                                <i class="fa fa-info-circle" tooltip-placement="auto left"
+                                   uib-tooltip="Online Feature Groups support real-time serving of features."
+                                   style="margin-left: 10px"></i>
+                                <span class="glyphicon sort-icon"
+                                      ng-show="featurestoreCtrl.featuregroupsSortKey == 'online'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuregroupsReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuregroupsReverse}"></span>
                             </th>
                             <th style="width: 10%" class="fs-table">
@@ -99,11 +119,22 @@
                         </thead>
                         <tbody class="table-hover">
                         <tr
-                                dir-paginate="featuregroup in featurestoreCtrl.featuregroupsDictList| orderBy :featurestoreCtrl.featuregroupsSortKey:featurestoreCtrl.featuregroupsReverse| filter:featurestoreCtrl.fgFilter:false | itemsPerPage:featurestoreCtrl.featuregroupsPageSize"
+                                dir-paginate="featuregroup in featurestoreCtrl.featuregroupsDictList| orderBy :featurestoreCtrl.featuregroupsSortFn:featurestoreCtrl.featuregroupsReverse | dateRangeFilterFeaturegroups : featurestoreCtrl.featuregroupsFromDate : featurestoreCtrl.featuregroupsToDate | filter:featurestoreCtrl.fgFilter:false | itemsPerPage:featurestoreCtrl.featuregroupsPageSize"
                                 pagination-id="featuregroupstable"
                                 class="fs-table">
                             <td class="fs-table">{{featuregroup.name}}</td>
+                            <td class="fs-table">
+                                {{featurestoreCtrl.createdOn(featuregroup.versionToGroups[featuregroup.activeVersion].created)}}
+                            </td>
                             <td class="fs-table">{{featuregroup.versionToGroups[featuregroup.activeVersion].type}}</td>
+                            <td class="fs-table">
+                                            <span
+                                                  ng-if="!featuregroup.versionToGroups[featuregroup.activeVersion].online">
+                                                No
+                                            </span>
+                                <span class="glyphicon glyphicon-ok-sign"
+                                      ng-if="featuregroup.versionToGroups[featuregroup.activeVersion].online"></span>
+                            </td>
                             <td class="fs-table">
                                 <ui-select ng-model="featuregroup.activeVersion"
                                            style="z-index: {{100-$index}}">
@@ -118,7 +149,8 @@
                             </td>
                             <td class="fs-table">
                                 <div class="btn-group fs-btn" role="group">
-                                    <button class="btn btn-info btn-default glyphicon glyphicon glyphicon-stats"
+                                    <button class="btn btn-primary btn-default glyphicon glyphicon glyphicon-stats"
+                                            style="background-color: rgb(51, 122, 183)"
                                             uib-tooltip="View statistics"
                                             ng-click="featurestoreCtrl.viewFeaturegroupStatistics(featuregroup.versionToGroups[featuregroup.activeVersion]); $event.stopPropagation();"></button>
                                     <button class="btn btn-danger glyphicon glyphicon-trash"
@@ -200,6 +232,10 @@
                                 <input class="form-control"
                                        style="margin-left: 10px;"
                                        ng-model="featurestoreCtrl.tdFilter">
+                                <md-datepicker ng-model="featurestoreCtrl.trainingDatasetsFromDate"
+                                               md-placeholder="From"></md-datepicker>
+                                <md-datepicker ng-model="featurestoreCtrl.trainingDatasetsToDate"
+                                               md-placeholder="To"></md-datepicker>
                             </label>
                         </div>
                         <div class="col-sm-6 col-md-6 col-lg-6 form-group">
@@ -223,14 +259,21 @@
                                       ng-show="featurestoreCtrl.trainingDatasetsSortKey == 'name'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.trainingDatasetsReverse,'glyphicon-chevron-down':!featurestoreCtrl.trainingDatasetsReverse}"></span>
                             </th>
-                            <th style="width: 40%" ng-click="featurestoreCtrl.trainingDatasetsSort('type')"
+                            <th style="width: 20%" ng-click="featurestoreCtrl.trainingDatasetsSort('created')"
+                                class="fs-table">
+                                Created
+                                <span class="glyphicon sort-icon"
+                                      ng-show="featurestoreCtrl.trainingDatasetsSortKey == 'created'"
+                                      ng-class="{'glyphicon-chevron-up':featurestoreCtrl.trainingDatasetsReverse,'glyphicon-chevron-down':!featurestoreCtrl.trainingDatasetsReverse}"></span>
+                            </th>
+                            <th style="width: 20%" ng-click="featurestoreCtrl.trainingDatasetsSort('dataFormat')"
                                 class="fs-table">
                                 Data Format
                                 <i class="fa fa-info-circle" tooltip-placement="auto left"
                                    uib-tooltip="Training Datasets can be stored in different formats depending on machine learning framework."
                                    style="margin-left: 10px"></i>
                                 <span class="glyphicon sort-icon"
-                                      ng-show="featurestoreCtrl.trainingDatasetsSortKey == 'type'"
+                                      ng-show="featurestoreCtrl.trainingDatasetsSortKey == 'dataFormat'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.trainingDatasetsReverse,'glyphicon-chevron-down':!featurestoreCtrl.trainingDatasetsReverse}"></span>
                             </th>
                             <th style="width: 10%" class="fs-table">
@@ -243,10 +286,13 @@
                         </thead>
                         <tbody class="table-hover">
                         <tr
-                                dir-paginate="td in featurestoreCtrl.trainingDatasetsDictList| orderBy :featurestoreCtrl.trainingDatasetsSortKey:featurestoreCtrl.trainingDatasetsReverse| filter:featurestoreCtrl.tdFilter:false | itemsPerPage:featurestoreCtrl.trainingDatasetsPageSize"
+                                dir-paginate="td in featurestoreCtrl.trainingDatasetsDictList| orderBy :featurestoreCtrl.trainingDatasetSortFn:featurestoreCtrl.trainingDatasetsReverse | dateRangeFilterFeaturegroups : featurestoreCtrl.trainingDatasetsFromDate : featurestoreCtrl.trainingDatasetsToDate | filter:featurestoreCtrl.tdFilter:false | itemsPerPage:featurestoreCtrl.trainingDatasetsPageSize"
                                 pagination-id="trainingdatasetstable"
                                 class="fs-table">
                             <td class="fs-table">{{td.name}}</td>
+                            <td class="fs-table">
+                                {{featurestoreCtrl.createdOn(td.versionToGroups[td.activeVersion].created)}}
+                            </td>
                             <td class="fs-table">{{td.versionToGroups[td.activeVersion].dataFormat}}</td>
                             <td class="fs-table">
                                 <ui-select ng-model="td.activeVersion"
@@ -262,7 +308,8 @@
                             </td>
                             <td class="fs-table">
                                 <div class="btn-group fs-btn" role="group">
-                                    <button class="btn btn-info btn-default glyphicon glyphicon glyphicon-stats"
+                                    <button class="btn btn-primary btn-default glyphicon glyphicon glyphicon-stats"
+                                            style="background-color: rgb(51, 122, 183)"
                                             uib-tooltip="View statistics"
                                             ng-click="featurestoreCtrl.viewTrainingDatasetStatistics(td.versionToGroups[td.activeVersion]); $event.stopPropagation();"></button>
                                     <button class="btn btn-danger glyphicon glyphicon-trash"
@@ -329,7 +376,8 @@
                                         >
                                     </label>
                                 </div>
-                                <div class="col-sm-6 col-md-6 col-lg-6 form-group" ng-if="featurestoreCtrl.fFilter != ''">
+                                <div class="col-sm-6 col-md-6 col-lg-6 form-group"
+                                     ng-if="featurestoreCtrl.fFilter != ''">
                                     <div class="pull-right btn-group">
                                         <label>Features per page:
                                             <input type="number" min="1"
@@ -342,7 +390,7 @@
                             <div class="row" style="margin-left:15px; margin-top:10px">
                                 <div>
                                     <label ng-click="featurestoreCtrl.setFeatureSearchFilterForm();"
-                                    style="color:#555">
+                                           style="color:#555">
                                         <span class="glyphicon glyphicon-chevron-right"
                                               ng-if="!featurestoreCtrl.featureSearchFilterForm"></span>
                                         <span class="glyphicon glyphicon-chevron-down"
@@ -416,7 +464,8 @@
                                                         </span>
                                                     </p>
                                                     <span class="plus"
-                                                          ng-click="featurestoreCtrl.viewFeatureInfo(result)"><a title="More Info"><i
+                                                          ng-click="featurestoreCtrl.viewFeatureInfo(result)"><a
+                                                            title="More Info"><i
                                                             class="glyphicon glyphicon-plus"></i></a></span>
                                                 </div>
                                                 <span class="clearfix borda"></span>
