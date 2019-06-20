@@ -548,6 +548,26 @@ angular.module('hopsWorksApp', [
                 return filtered;
             };
         }])
+        .filter('dateRangeFilterFeatures', ['$filter', function() {
+            return function(items, fromDate, toDate) {
+                var filtered = [];
+                //var from_date = Date.parse(fromDate);
+                // var to_date = Date.parse(toDate);
+                angular.forEach(items, function(item) {
+                    var createdDate = new Date(item.date)
+                    if(createdDate > fromDate && createdDate < toDate) {
+                        filtered.push(item);
+                    }
+                });
+                return filtered;
+            };
+        }])
+        .filter('featuresNotInFeaturegroupsFilter', ['$filter', function() {
+        return function(item) {
+            var filtered = [];
+            return filtered;
+        };
+        }])
         .run(['$rootScope', '$routeParams', '$http', function ($rootScope, $routeParams, $http) {
             var token = localStorage.getItem("token");
             if (token) {

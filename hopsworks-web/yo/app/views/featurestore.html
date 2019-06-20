@@ -50,8 +50,8 @@
                     </h3>
 
                     <div class="row form-inline" ng-show="featurestoreCtrl.featuregroupsDictList.length > 0">
-                        <div class="col-sm-6 col-md-6 col-lg-6 form-group">
-                            <label style="margin-left: 20px; color:#555">
+                        <div class="col-sm-9 form-group">
+                            <label style="color:#555">
                                 Search:
                                 <input class="form-control"
                                        style="margin-left: 10px;"
@@ -62,12 +62,13 @@
                                                md-placeholder="To"></md-datepicker>
                             </label>
                         </div>
-                        <div class="col-sm-6 col-md-6 col-lg-6 form-group">
+                        <div class="col-sm-3 form-group">
                             <div class="pull-right btn-group">
                                 <label>Feature Groups per page:
                                     <input type="number" min="1"
                                            max="50"
-                                           class="form-control" ng-model="featurestoreCtrl.featuregroupsPageSize">
+                                           class="form-control" ng-model="featurestoreCtrl.featuregroupsPageSize"
+                                           style="width:80px">
                                 </label>
                             </div>
                         </div>
@@ -100,7 +101,8 @@
                                       ng-show="featurestoreCtrl.featuregroupsSortKey == 'type'"
                                       ng-class="{'glyphicon-chevron-up':featurestoreCtrl.featuregroupsReverse,'glyphicon-chevron-down':!featurestoreCtrl.featuregroupsReverse}"></span>
                             </th>
-                            <th style="width: 10%" class="fs-table" ng-click="featurestoreCtrl.featuregroupsSort('online')">
+                            <th style="width: 10%" class="fs-table"
+                                ng-click="featurestoreCtrl.featuregroupsSort('online')">
                                 Online
                                 <i class="fa fa-info-circle" tooltip-placement="auto left"
                                    uib-tooltip="Online Feature Groups support real-time serving of features."
@@ -129,7 +131,7 @@
                             <td class="fs-table">{{featuregroup.versionToGroups[featuregroup.activeVersion].type}}</td>
                             <td class="fs-table">
                                             <span
-                                                  ng-if="!featuregroup.versionToGroups[featuregroup.activeVersion].online">
+                                                    ng-if="!featuregroup.versionToGroups[featuregroup.activeVersion].online">
                                                 No
                                             </span>
                                 <span class="glyphicon glyphicon-ok-sign"
@@ -226,8 +228,8 @@
                     </h3>
 
                     <div class="row form-inline" ng-show="featurestoreCtrl.trainingDatasetsDictList.length > 0">
-                        <div class="col-sm-6 col-md-6 col-lg-6 form-group">
-                            <label style="margin-left: 20px; color:#555">
+                        <div class="col-sm-9 form-group">
+                            <label style="color:#555">
                                 Search:
                                 <input class="form-control"
                                        style="margin-left: 10px;"
@@ -238,12 +240,13 @@
                                                md-placeholder="To"></md-datepicker>
                             </label>
                         </div>
-                        <div class="col-sm-6 col-md-6 col-lg-6 form-group">
+                        <div class="col-sm-3 form-group">
                             <div class="pull-right btn-group">
                                 <label>Training Datasets per page:
                                     <input type="number" min="1"
                                            max="50"
-                                           class="form-control" ng-model="featurestoreCtrl.trainingDatasetsPageSize">
+                                           class="form-control" ng-model="featurestoreCtrl.trainingDatasetsPageSize"
+                                           style="width:80px">
                                 </label>
                             </div>
                         </div>
@@ -367,22 +370,28 @@
                         </h2>
                         <div>
                             <div class="row form-inline">
-                                <div class="col-sm-6 col-md-6 col-lg-6 form-group">
-                                    <label style="margin-left: 20px; color:#555">
+                                <div class="col-sm-9 form-group">
+                                    <label style="color:#555">
                                         Search:
                                         <input class="form-control"
                                                style="margin-left: 10px;"
                                                ng-model="featurestoreCtrl.fFilter"
+                                               placeholder="Search for a feature"
                                         >
+                                        <md-datepicker ng-model="featurestoreCtrl.featuresFromDate"
+                                                       md-placeholder="From"></md-datepicker>
+                                        <md-datepicker ng-model="featurestoreCtrl.featuresToDate"
+                                                       md-placeholder="To"></md-datepicker>
                                     </label>
                                 </div>
-                                <div class="col-sm-6 col-md-6 col-lg-6 form-group"
+                                <div class="col-sm-3 form-group"
                                      ng-if="featurestoreCtrl.fFilter != ''">
                                     <div class="pull-right btn-group">
                                         <label>Features per page:
                                             <input type="number" min="1"
                                                    max="50"
-                                                   class="form-control" ng-model="featurestoreCtrl.featuresPageSize">
+                                                   class="form-control" ng-model="featurestoreCtrl.featuresPageSize"
+                                                   style="width:80px">
                                         </label>
                                     </div>
                                 </div>
@@ -398,7 +407,27 @@
                                         Search Settings</label>
                                 </div>
                                 <div ng-if="featurestoreCtrl.featureSearchFilterForm" class="animate-if">
-                                    <p> Test</p>
+
+                                    <div class="form-group">
+                                        <md-checkbox class="md-primary"
+                                                     ng-checked="featurestoreCtrl.searchInFeaturegroups"
+                                                     ng-click="featurestoreCtrl.setSearchInFeaturegroups()"
+                                                     aria-label="Search in Feature Groups"
+                                                     dir="rtl"
+                                        >
+                                            Search in Feature Groups
+                                        </md-checkbox>
+                                        <br>
+                                        <md-checkbox class="md-primary"
+                                                     ng-checked="featurestoreCtrl.searchInTrainingDatasets"
+                                                     ng-click="featurestoreCtrl.setSearchInTrainingDatasets()"
+                                                     aria-label="Search in Training Datasets"
+                                                     dir="rtl"
+                                        >
+                                            Search in Training Datasets
+                                        </md-checkbox>
+                                        <br>
+                                    </div>
                                 </div>
                             </div>
                             <section class="search-result" ng-if="featurestoreCtrl.fFilter != ''">
@@ -413,7 +442,7 @@
                                 <div class="search-result-body row thin-scrollbar">
                                     <section class="col-xs-12 col-sm-6 col-md-12">
                                         <div
-                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | filter:featurestoreCtrl.fFilter:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
+                                                dir-paginate="result in ((filteredResults = (featurestoreCtrl.features | orderBy:featurestoreCtrl.featuresSortKey:featurestoreCtrl.featuresReverse | dateRangeFilterFeatures : featurestoreCtrl.featuresFromDate : featurestoreCtrl.featuresToDate | filter: (!featurestoreCtrl.searchInFeaturegroups || '') && { entity: '!' + featurestoreCtrl.featuregroupType} | filter: (!featurestoreCtrl.searchInTrainingDatasets || '') && { entity: '!' + featurestoreCtrl.trainingDatasetType} | filter:featurestoreCtrl.fFilter:false)) | itemsPerPage:featurestoreCtrl.featuresPageSize)">
 
                                             <article class="feature-search-result row">
                                                 <div class="col-xs-12 col-sm-12 col-md-3">
@@ -507,7 +536,7 @@
                                         <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading"
                                             style="color:#555">
                                             Features</h5>
-                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
+                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555;font-size: 2rem">
                                             {{featurestoreCtrl.features.length}}</h1>
                                     </div>
                                 </div>
@@ -525,7 +554,7 @@
                                         <h5 class="fs_card text-uppercase bold_fs fs_top_card fs_top_heading"
                                             style="color:#555">
                                             Feature Groups</h5>
-                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
+                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555;font-size: 2rem">
                                             {{featurestoreCtrl.featuregroups.length}}</h1>
                                     </div>
                                 </div>
@@ -548,11 +577,17 @@
                                             style="color:#555"
                                         >Training
                                             Datasets</h5>
-                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555">
+                                        <h1 class="fs_card display-1 fs_top_card fs_top_num" style="color:#555;font-size: 2rem">
                                             {{featurestoreCtrl.trainingDatasets.length}}</h1>
                                     </div>
                                 </div>
-                                <div id="featureStoragePie">
+                                <div id="featureStoragePie"
+                                     ng-if="featurestoreCtrl.trainingDatasets.length > 0 || featurestoreCtrl.featuregroups.length > 0">
+                                </div>
+                                <div
+                                        ng-if="featurestoreCtrl.trainingDatasets.length == 0 && featurestoreCtrl.featuregroups.length == 0"
+                                        style="margin-top:100px; margin-bottom:150px; margin-left:90px">
+                                    No Data
                                 </div>
                                 <div style="margin-left:80px; margin-top:15px;">
                                     <small class="text-muted">

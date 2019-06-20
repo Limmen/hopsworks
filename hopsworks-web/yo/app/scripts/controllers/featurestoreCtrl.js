@@ -87,6 +87,31 @@ angular.module('hopsWorksApp')
             self.trainingDatasetsToDate.setMinutes(self.trainingDatasetsToDate.getMinutes() + 60*24);
             self.trainingDatasetsFromDate = new Date();
             self.trainingDatasetsFromDate.setMinutes(self.trainingDatasetsFromDate.getMinutes() - 60*24*30*4);
+            self.featuresToDate = new Date();
+            self.featuresToDate.setMinutes(self.featuresToDate.getMinutes() + 60*24);
+            self.featuresFromDate = new Date();
+            self.featuresFromDate.setMinutes(self.featuresFromDate.getMinutes() - 60*24*30*4);
+            self.searchInFeaturegroups = true
+            self.searchInTrainingDatasets = true
+            self.featuregroupType = "Feature Group"
+            self.trainingDatasetType = "Training Dataset"
+
+
+            self.setSearchInFeaturegroups = function() {
+                if(self.searchInFeaturegroups){
+                    self.searchInFeaturegroups = false
+                } else {
+                    self.searchInFeaturegroups = true
+                }
+            }
+
+            self.setSearchInTrainingDatasets = function() {
+                if(self.searchInTrainingDatasets){
+                    self.searchInTrainingDatasets = false
+                } else {
+                    self.searchInTrainingDatasets = true
+                }
+            }
 
             self.setFeatureSearchFilterForm = function() {
                 if(self.featureSearchFilterForm) {
@@ -507,7 +532,7 @@ angular.module('hopsWorksApp')
                             featuregroup: self.featuregroups[i].name,
                             date: self.featuregroups[i].created,
                             version: self.featuregroups[i].version,
-                            entity: "Feature Group"
+                            entity: self.featuregroupType
                         })
                     }
                     featuresTemp = featuresTemp.concat(fgFeatures)
@@ -522,7 +547,7 @@ angular.module('hopsWorksApp')
                             trainingDataset: self.trainingDatasets[i].name,
                             date: self.trainingDatasets[i].created,
                             version: self.trainingDatasets[i].version,
-                            entity: "Training Dataset"
+                            entity: self.trainingDatasetType
                         })
                     }
                     featuresTemp = featuresTemp.concat(tdFeatures)
@@ -1037,22 +1062,24 @@ angular.module('hopsWorksApp')
             }
 
             self.renderPieChart = function() {
-                if(self.featureStoragePieChart != null) {
-                    self.featureStoragePieChart.destroy()
-                    self.featureStoragePieChart = null;
-                    self.featureStoragePieChart = new ApexCharts(
-                        document.querySelector("#featureStoragePie"),
-                        self.featureStoragePieOptions
-                    );
-                    self.featureStoragePieChart.render();
-                }
-                if(self.featureStoragePieChart == null) {
-                    self.setupPieChart();
-                    self.featureStoragePieChart = new ApexCharts(
-                        document.querySelector("#featureStoragePie"),
-                        self.featureStoragePieOptions
-                    );
-                    self.featureStoragePieChart.render();
+                if(self.trainingDatasets.length > 0 || self.featuregroups.length > 0) {
+                    if (self.featureStoragePieChart != null) {
+                        self.featureStoragePieChart.destroy()
+                        self.featureStoragePieChart = null;
+                        self.featureStoragePieChart = new ApexCharts(
+                            document.querySelector("#featureStoragePie"),
+                            self.featureStoragePieOptions
+                        );
+                        self.featureStoragePieChart.render();
+                    }
+                    if (self.featureStoragePieChart == null) {
+                        self.setupPieChart();
+                        self.featureStoragePieChart = new ApexCharts(
+                            document.querySelector("#featureStoragePie"),
+                            self.featureStoragePieOptions
+                        );
+                        self.featureStoragePieChart.render();
+                    }
                 }
             }
 

@@ -440,3 +440,74 @@ a.fs_card.bg-inverse:focus, a.fs_card.bg-inverse:hover {
 .feature-search-result span.plus a:hover { background-color: #414141; }
 .feature-search-result span.plus a i { color: #fff !important; }
 .feature-search-result span.border { display: block; width: 97%; margin: 0 15px; border-bottom: 1px dotted #ccc; }
+
+
+
+.fs_card.display-1 {
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 1.1
+}
+
+.fs_card.display-2 {
+    font-size: 5.5rem;
+    font-weight: 300;
+    line-height: 1.1
+}
+
+.fs_card.display-3 {
+    font-size: 4.5rem;
+    font-weight: 300;
+    line-height: 1.1
+}
+
+.fs_card.display-4 {
+    font-size: 3.5rem;
+    font-weight: 300;
+    line-height: 1.1
+}
+
+.fs_card.text-uppercase {
+    text-transform: uppercase !important
+}
+
+.fs_card h1, .fs_card h2, .fs_card h3, .fs_card h4, .fs_card h5, .fs_card h6, .fs_card h1, .fs_card h2, .fs_card h3, .fs_card h4, .fs_card h5, .fs_card h6 {
+    margin-bottom: .5rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit
+}
+
+.fs_card.h1, .fs_card h1 {
+    font-size: 2.5rem
+}
+
+.fs_card.h2, .fs_card h2 {
+    font-size: 2rem
+}
+
+.fs_card.h3, .fs_card h3 {
+    font-size: 1.75rem
+}
+
+.fs_card.h4, .fs_card h4 {
+    font-size: 1.5rem
+}
+
+.fs_card.h5, .fs_card h5 {
+    font-size: 1.25rem
+}
+
+.fs_card.h6, .fs_card h6 {
+    font-size: 0.75rem
+}
+
+.fs_card.lead {
+    font-size: 1.25rem;
+    font-weight: 300
+}
+
+.bold_fs {
+    font-weight: bolder;
+}
