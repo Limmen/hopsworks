@@ -17,7 +17,6 @@
 package io.hops.hopsworks.api.featurestore.util;
 
 import io.hops.hopsworks.common.constants.auth.AllowedRoles;
-import io.hops.hopsworks.common.dao.dataset.Dataset;
 import io.hops.hopsworks.common.dao.dataset.DatasetFacade;
 import io.hops.hopsworks.common.dao.featurestore.Featurestore;
 import io.hops.hopsworks.common.dao.featurestore.FeaturestoreEntityDTO;
@@ -25,7 +24,6 @@ import io.hops.hopsworks.common.dao.featurestore.storageconnector.FeaturestoreSt
 import io.hops.hopsworks.common.dao.project.Project;
 import io.hops.hopsworks.common.dao.project.team.ProjectTeamFacade;
 import io.hops.hopsworks.common.dao.user.Users;
-import io.hops.hopsworks.common.util.Settings;
 import io.hops.hopsworks.exceptions.FeaturestoreException;
 import io.hops.hopsworks.restutils.RESTCodes;
 
@@ -46,39 +44,6 @@ public class FeaturestoreUtil {
   private ProjectTeamFacade projectTeamFacade;
 
   private static final Logger LOGGER = Logger.getLogger(FeaturestoreUtil.class.getName());
-
-  /**
-   * Helper function that gets the Dataset where all the training dataset in the featurestore resides within the project
-   *
-   * @param project the project to get the dataset for
-   * @return the training dataset for the project
-   */
-  public Dataset getTrainingDatasetFolder(Project project){
-    return datasetFacade.findByNameAndProjectId(project, getTrainingDatasetFolderName(project));
-  }
-
-  /**
-   * Returns the training dataset folder name of a project (projectname_Training_Datasets)
-   *
-   * @param project the project to get the folder name for
-   * @return the name of the folder
-   */
-  public String getTrainingDatasetFolderName(Project project){
-    return project.getName() + "_" + Settings.ServiceDataset.TRAININGDATASETS.getName();
-  }
-
-  /**
-   * Helper function that gets the training dataset path from a folder and training dataset name.
-   * (path_to_folder/trainingdatasetName_version)
-   *
-   * @param trainingDatasetsFolderPath the path to the dataset folder
-   * @param trainingDatasetName the name of the training dataset
-   * @param version the version of the training dataset
-   * @return the path to the training dataset as a child-file of the training dataset folder
-   */
-  public String getTrainingDatasetPath(String trainingDatasetsFolderPath, String trainingDatasetName, Integer version){
-    return trainingDatasetsFolderPath + "/" + trainingDatasetName + "_" + version;
-  }
 
   /**
    * Verify that the user is allowed to execute the requested operation based on his/hers project role
