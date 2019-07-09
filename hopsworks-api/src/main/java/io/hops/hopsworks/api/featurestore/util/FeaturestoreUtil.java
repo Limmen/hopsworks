@@ -17,7 +17,6 @@
 package io.hops.hopsworks.api.featurestore.util;
 
 import io.hops.hopsworks.common.constants.auth.AllowedRoles;
-import io.hops.hopsworks.common.dao.dataset.DatasetFacade;
 import io.hops.hopsworks.common.dao.featurestore.Featurestore;
 import io.hops.hopsworks.common.dao.featurestore.FeaturestoreEntityDTO;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.FeaturestoreStorageConnectorDTO;
@@ -30,7 +29,6 @@ import io.hops.hopsworks.restutils.RESTCodes;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utility functions for the featurestore service
@@ -39,11 +37,7 @@ import java.util.logging.Logger;
 public class FeaturestoreUtil {
 
   @EJB
-  private DatasetFacade datasetFacade;
-  @EJB
   private ProjectTeamFacade projectTeamFacade;
-
-  private static final Logger LOGGER = Logger.getLogger(FeaturestoreUtil.class.getName());
 
   /**
    * Verify that the user is allowed to execute the requested operation based on his/hers project role
@@ -90,6 +84,34 @@ public class FeaturestoreUtil {
       throw new FeaturestoreException(RESTCodes.FeaturestoreErrorCode.UNAUTHORIZED_FEATURESTORE_OPERATION, Level.FINE,
           "project: " + project.getName() + ", featurestoreId: " + featurestore.getId() +
               ", storageConnectorId: " + storageConnectorDTO.getId() + ", userRole:" + userRole);
+    }
+  }
+  
+  /**
+   * Return default updateMetadata query parameter value if not specified
+   *
+   * @param updateMetadata the query parameter provided by the user
+   * @return the default value
+   */
+  public Boolean updateMetadataGetOrDefault(Boolean updateMetadata) {
+    if(updateMetadata == null){
+      return false;
+    } else {
+      return updateMetadata;
+    }
+  }
+  
+  /**
+   * Return default updateStats query parameter value if not specified
+   *
+   * @param updateStats the query parameter provided by the user
+   * @return the default value
+   */
+  public Boolean updateStatsGetOrDefault(Boolean updateStats) {
+    if(updateStats == null){
+      return false;
+    } else {
+      return updateStats;
     }
   }
 }
