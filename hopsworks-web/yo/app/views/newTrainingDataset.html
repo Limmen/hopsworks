@@ -44,7 +44,7 @@
                 <h2 style="margin-bottom: 30px;color:#555"
                     ng-if="newTrainingDatasetCtrl.trainingDatasetOperation === 'UPDATE'">
                     Select Features to Update the Training Dataset
-                    <code>{{newTrainingDatasetCtrl.trainingDatasetName}}</code>
+                    <span style="font-weight:700">{{newTrainingDatasetCtrl.trainingDatasetName}}</span>
                     <i class="fa fa-info-circle" tooltip-placement="auto left"
                        uib-tooltip='Training Datasets are immutable snapshots of features in the Feature Store.
                                    A Training Dataset can include features across multiple Feature Groups.'></i>
@@ -52,7 +52,7 @@
                 <h2 style="margin-bottom: 30px;color:#555"
                     ng-if="newTrainingDatasetCtrl.trainingDatasetOperation === 'NEW_VERSION'">
                     Select Features to Create a New Version of the Training Dataset
-                    <code>{{newTrainingDatasetCtrl.trainingDatasetName}}</code>
+                    <span style="font-weight:700">{{newTrainingDatasetCtrl.trainingDatasetName}}</span>
                     <i class="fa fa-info-circle" tooltip-placement="auto left"
                        uib-tooltip='Training Datasets are immutable snapshots of features in the Feature Store.
                                    A Training Dataset can include features across multiple Feature Groups.'></i>
@@ -150,7 +150,7 @@
                                         </th>
                                         <th style="width: 15%"
                                             class="fs-table">
-                                            Feature Group/Training Dataset
+                                            Feature Group
                                         </th>
                                         <th style="width: 5%"
                                             class="fs-table">
@@ -176,11 +176,11 @@
                                             </span>
                                         </td>
                                         <td class="fs-table">
-                                            <span ng-if="result.entity == 'Feature Group'">
+                                            <span ng-if="result.entity === 1">
                                                 <i class="glyphicon glyphicon-tags"></i>
                                                 <span> Feature in Feature Group</span>
                                             </span>
-                                            <span ng-if="result.entity == 'Training Dataset'">
+                                            <span ng-if="result.entity === 0">
                                                 <i class="glyphicon glyphicon-tags"></i>
                                                 <span> Feature in Training Dataset</span>
                                             </span>
@@ -188,10 +188,10 @@
                                         <td class="fs-table">{{result.name}}</td>
                                         <td class="fs-table">{{result.type}}</td>
                                         <td class="fs-table">
-                                        <span ng-if="result.entity == newTrainingDatasetCtrl.featuregroupType">
+                                        <span ng-if="result.entity === 1">
                                                 {{result.featuregroup.name}}
                                         </span>
-                                            <span ng-if="result.entity == newTrainingDatasetCtrl.trainingDatasetType">
+                                            <span ng-if="result.entity === 0">
                                                 {{result.trainingDataset.name}}
                                         </span>
                                         </td>
@@ -201,7 +201,8 @@
                                                 <button uib-tooltip="Feature Details"
                                                         type="button"
                                                         class="btn btn-info btn-sm glyphicon glyphicon-eye-open"
-                                                        ng-click="newTrainingDatasetCtrl.viewFeatureInfo(result)">
+                                                        ng-click="newTrainingDatasetCtrl.viewFeatureInfo(result)"
+                                                        style="background-color:rgb(51, 122, 183); border:rgb(51, 122, 183);">
                                                 </button>
                                                 <button uib-tooltip="Add feature to Training Dataset"
                                                         type="button"
@@ -218,7 +219,7 @@
                             <div class="row divider" style="margin-bottom: 0px;"></div>
                             <div class="row" style="margin-top: -20px">
                                 <dir-pagination-controls
-                                        ng-show="(newTrainingDatasetCtrl.features.length /newTrainingDatasetCtrl.featuresPageSize) > 1 "
+                                        ng-if="newTrainingDatasetCtrl.fFilter != '' || newTrainingDatasetCtrl.featureSearchFgFilter != '' || newTrainingDatasetCtrl.featureSearchFgVersionFilter != ''"
                                         max-size="15"
                                         direction-links="true"
                                         boundary-links="true"
@@ -298,12 +299,12 @@
                                 New Training Dataset Definition
                             </h2>
                             <h2 ng-if="newTrainingDatasetCtrl.trainingDatasetOperation === 'UPDATE'">
-                                Update Training Dataset: <code>{{newTrainingDatasetCtrl.trainingDataset
-                                .name}}</code>
+                                Update Training Dataset: <span style="font-weight:700">{{newTrainingDatasetCtrl.trainingDataset
+                                .name}}</span>
                             </h2>
                             <h2 ng-if="newTrainingDatasetCtrl.trainingDatasetOperation === 'NEW_VERSION'">
-                                Create New Version of Training Dataset: <code>{{newTrainingDatasetCtrl.trainingDataset
-                                .name}}</code>
+                                Create New Version of Training Dataset: <span style="font-weight:700">{{newTrainingDatasetCtrl.trainingDataset
+                                .name}}</span>
                             </h2>
                         </div>
                     </div>

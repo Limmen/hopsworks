@@ -2301,9 +2301,19 @@ public class Settings implements Serializable {
     return "hops-examples-spark-" + HOPS_EXAMPLES_VERSION + ".jar";
   }
 
-  public synchronized String getHopsExamplesFeaturestoreFilename() {
+  public synchronized String getHopsExamplesFeaturestoreTourFilename() {
     checkCache();
     return "hops-examples-featurestore-tour-" + HOPS_EXAMPLES_VERSION + ".jar";
+  }
+
+  public synchronized String getHopsExamplesFeaturestoreUtil4JFilename() {
+    checkCache();
+    return "hops-examples-featurestore-util4j-" + HOPS_EXAMPLES_VERSION + ".jar";
+  }
+
+  public synchronized String getHopsExamplesFeaturestoreUtilPythonFilename() {
+    checkCache();
+    return "featurestore_util.py";
   }
 
   private String VERIFICATION_PATH = "hopsworks-api/api/auth/verify";

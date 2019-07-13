@@ -32,7 +32,6 @@ import io.hops.hopsworks.common.dao.featurestore.trainingdataset.hopsfs_training
 import io.hops.hopsworks.common.dao.featurestore.trainingdataset.hopsfs_trainingdataset.HopsfsTrainingDatasetController;
 import io.hops.hopsworks.common.dao.featurestore.trainingdataset.hopsfs_trainingdataset.HopsfsTrainingDatasetDTO;
 import io.hops.hopsworks.common.dao.hdfs.inode.Inode;
-import io.hops.hopsworks.common.dao.hdfs.inode.InodeFacade;
 import io.hops.hopsworks.common.dao.hdfsUser.HdfsUsers;
 import io.hops.hopsworks.common.dao.hdfsUser.HdfsUsersFacade;
 import io.hops.hopsworks.common.dao.jobs.description.JobFacade;
@@ -67,8 +66,6 @@ public class TrainingDatasetController {
   private HdfsUsersController hdfsUsersController;
   @EJB
   private FeaturestoreFacade featurestoreFacade;
-  @EJB
-  private InodeFacade inodeFacade;
   @EJB
   private FeaturestoreStatisticController featurestoreStatisticController;
   @EJB

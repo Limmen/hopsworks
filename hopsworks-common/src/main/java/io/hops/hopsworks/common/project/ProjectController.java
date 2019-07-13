@@ -2335,9 +2335,9 @@ public class ProjectController {
         case FEATURESTORE:
           // Get the JAR from /user/<super user>
           String featurestoreExampleJarSrc = "/user/" + settings.getSparkUser() + "/"
-              + settings.getHopsExamplesFeaturestoreFilename();
+              + settings.getHopsExamplesFeaturestoreTourFilename();
           String featurestoreExampleJarDst = projectPath
-              + Settings.HOPS_TOUR_DATASET + "/" + settings.getHopsExamplesFeaturestoreFilename();
+              + Settings.HOPS_TOUR_DATASET + "/" + settings.getHopsExamplesFeaturestoreTourFilename();
           // Get the sample data and notebooks from /user/<super user>/featurestore_demo/
           String featurestoreExampleDataSrc = "/user/" + settings.getHdfsSuperUser() + "/" +
               Settings.HOPS_FEATURESTORE_TOUR_DATA + "/*";

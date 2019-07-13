@@ -296,6 +296,7 @@ angular.module('hopsWorksApp')
              * Opens the modal with a form for creating a new storage connector
              */
             self.showAddStorageConnectorForm = function () {
+                StorageService.store("connector_operation", "CREATE");
                 self.goToUrl("newstorageconnector")
             }
 
@@ -523,6 +524,17 @@ angular.module('hopsWorksApp')
             };
 
             /**
+             * Shows the page for updating an existing storage connector.
+             *
+             * @param storageConnector
+             */
+            self.updateStorageConnector = function (storageConnector) {
+                StorageService.store("connector_operation", "UPDATE");
+                StorageService.store(self.projectId + "_connector", storageConnector);
+                self.goToUrl("newstorageconnector")
+            };
+
+            /**
              * Called when the delete-featuregroup-button is pressed
              *
              * @param featuregroup
@@ -619,7 +631,8 @@ angular.module('hopsWorksApp')
              * @param featuregroup
              */
             self.viewFeaturegroupStatistics = function (featuregroup) {
-                ModalService.viewFeaturegroupStatistics('lg', self.projectId, featuregroup, self.projectName, self.featurestore).then(
+                ModalService.viewFeaturegroupStatistics('lg', self.projectId, featuregroup, self.projectName,
+                    self.featurestore, self.settings).then(
                     function (success) {
                     }, function (error) {
                     });
@@ -632,7 +645,7 @@ angular.module('hopsWorksApp')
              */
             self.viewTrainingDatasetStatistics = function (trainingDataset) {
                 ModalService.viewTrainingDatasetStatistics('lg', self.projectId, trainingDataset, self.projectName,
-                    self.featurestore).then(
+                    self.featurestore, self.settings).then(
                     function (success) {
                     }, function (error) {
                     });
@@ -714,7 +727,7 @@ angular.module('hopsWorksApp')
                             featuregroup: self.featuregroups[i],
                             date: self.featuregroups[i].created,
                             version: self.featuregroups[i].version,
-                            entity: self.featuregroupType
+                            entity: 1
                         })
                     }
                     fgFeaturesTemp = fgFeaturesTemp.concat(fgFeatures)
@@ -731,7 +744,7 @@ angular.module('hopsWorksApp')
                             trainingDataset: self.trainingDatasets[i],
                             date: self.trainingDatasets[i].created,
                             version: self.trainingDatasets[i].version,
-                            entity: self.trainingDatasetType
+                            entity: 0
                         })
                     }
                     featuresTemp = featuresTemp.concat(tdFeatures)
@@ -1068,7 +1081,7 @@ angular.module('hopsWorksApp')
              * Find featuregroup with a given name and version
              *
              * @param featuregroupName the name of the featuregroup
-             * @param version the version of the featuergroup
+             * @param version the version of the featuregroup
              * @returns featuregroup
              */
             self.getFeaturegroupByNameAndVersion = function (featuregroupName, version) {
