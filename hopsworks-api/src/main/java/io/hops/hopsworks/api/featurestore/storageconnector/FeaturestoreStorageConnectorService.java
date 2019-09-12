@@ -32,11 +32,7 @@ import io.hops.hopsworks.common.dao.project.Project;
 import io.hops.hopsworks.common.dao.user.Users;
 import io.hops.hopsworks.common.dao.user.activity.ActivityFacade;
 import io.hops.hopsworks.common.dao.user.activity.ActivityFlag;
-import io.hops.hopsworks.common.dao.user.security.secrets.SecretPlaintext;
-import io.hops.hopsworks.common.security.secrets.SecretsController;
-import io.hops.hopsworks.common.util.Settings;
 import io.hops.hopsworks.exceptions.FeaturestoreException;
-import io.hops.hopsworks.exceptions.UserException;
 import io.hops.hopsworks.jwt.annotation.JWTRequired;
 import io.hops.hopsworks.restutils.RESTCodes;
 import io.swagger.annotations.Api;
@@ -61,7 +57,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * A Stateless RESTful service for the storage connectors in a featurestore on Hopsworks.
@@ -84,10 +79,6 @@ public class FeaturestoreStorageConnectorService {
   private ActivityFacade activityFacade;
   @EJB
   private JWTHelper jWTHelper;
-  @EJB
-  private Settings settings;
-  @EJB
-  private SecretsController secretsController;
   
   private Project project;
   private Featurestore featurestore;
@@ -334,8 +325,8 @@ public class FeaturestoreStorageConnectorService {
    * The JDBC connector is generated from the MySQL Server host:port, the user's username
    * and password (from the SecretsController).
    *
-   * @param sc
-   * @return
+   * @param sc security context
+   * @return DTO of the storage connector for the online feature store
    * @throws FeaturestoreException
    */
   @GET
@@ -350,39 +341,10 @@ public class FeaturestoreStorageConnectorService {
       SecurityContext sc)
     throws FeaturestoreException {
     Users user = jWTHelper.getUserPrincipal(sc);
-    Integer id = -1;
-    String dbUsername = featurestoreController.onlineDbUsername(project, user);
-    String hostname = settings.getHopsworksIp();
-    String password = "";
-    try {
-      List<SecretPlaintext> passwords = secretsController.getAllForUser(user);
-      for (SecretPlaintext sp : passwords) {
-        if (sp.getKeyName().compareToIgnoreCase(dbUsername) == 0) {
-          password = sp.getPlaintext();
-        }
-      }
-      if (password.isEmpty()) {
-        throw new FeaturestoreException(RESTCodes.FeaturestoreErrorCode.FEATURESTORE_ONLINE_SECRETS_ERROR,
-          Level.WARNING, "Could not find a password for the JDBC connection to the online FS");
-      }
-    } catch (UserException e) {
-      e.printStackTrace();
-      throw new FeaturestoreException(RESTCodes.FeaturestoreErrorCode.FEATURESTORE_ONLINE_SECRETS_ERROR,
-        Level.WARNING, "Problem getting secrets for the JDBC connection to the online FS");
-    }
-    String port = "3306";
-    String connectionString =
-      "jdbc://" + dbUsername + ":" + password + "@" + hostname + ":" + port + "/" + project.getName();
-    
-    FeaturestoreJdbcConnectorDTO dto = new FeaturestoreJdbcConnectorDTO();
-    dto.setArguments(connectionString);
-    dto.setDescription("Online Featurestore JDBC connection string");
-    dto.setStorageConnectorType(FeaturestoreStorageConnectorType.JDBC);
-    dto.setName("onlinefeaturestore");
-    dto.setFeaturestoreId(this.featurestore.getId());
-    
+    FeaturestoreJdbcConnectorDTO featurestoreJdbcConnectorDTO =
+      featurestoreStorageConnectorController.createJdbcConnectorDTOForOnlineFeaturestore(featurestore, project, user);
     GenericEntity<FeaturestoreStorageConnectorDTO> featurestoreStorageConnectorDTOGenericEntity =
-      new GenericEntity<FeaturestoreStorageConnectorDTO>(dto) {
+      new GenericEntity<FeaturestoreStorageConnectorDTO>(featurestoreJdbcConnectorDTO) {
       };
     return noCacheResponse.getNoCacheResponseBuilder(Response.Status.OK)
       .entity(featurestoreStorageConnectorDTOGenericEntity).build();

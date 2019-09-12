@@ -17,17 +17,22 @@
 package io.hops.hopsworks.common.dao.featurestore.storageconnector;
 
 import io.hops.hopsworks.common.dao.featurestore.Featurestore;
+import io.hops.hopsworks.common.dao.featurestore.FeaturestoreController;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.hopsfs.FeaturestoreHopsfsConnectorController;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.hopsfs.FeaturestoreHopsfsConnectorDTO;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.jdbc.FeaturestoreJdbcConnectorController;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.jdbc.FeaturestoreJdbcConnectorDTO;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.s3.FeaturestoreS3ConnectorController;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.s3.FeaturestoreS3ConnectorDTO;
+import io.hops.hopsworks.common.dao.project.Project;
+import io.hops.hopsworks.common.dao.user.Users;
 import io.hops.hopsworks.exceptions.FeaturestoreException;
 import io.hops.hopsworks.restutils.RESTCodes;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +47,8 @@ public class FeaturestoreStorageConnectorController {
   private FeaturestoreJdbcConnectorController featurestoreJdbcConnectorController;
   @EJB
   private FeaturestoreS3ConnectorController featurestoreS3ConnectorController;
+  @EJB
+  private FeaturestoreController featurestoreController;
 
 
   /**
@@ -195,6 +202,23 @@ public class FeaturestoreStorageConnectorController {
             FeaturestoreStorageConnectorType.S3 + ", and " + FeaturestoreStorageConnectorType.JDBC
             + ". The provided training dataset type was not recognized: " + featurestoreStorageConnectorType);
     }
+  }
+
+  /**
+   * Create DTO for JDBC connector to the online feature store of a particular user and project
+   *
+   * @param featurestore the featurestore entity
+   * @param project the project of the user
+   * @param user the user making the request
+   * @return a DTO of the JDBC connection to the online feature store of the given project and user
+   * @throws FeaturestoreException
+   */
+  @TransactionAttribute(TransactionAttributeType.NEVER)
+  public FeaturestoreJdbcConnectorDTO createJdbcConnectorDTOForOnlineFeaturestore(Featurestore featurestore,
+    Project project, Users user) throws FeaturestoreException {
+    String dbUsername = featurestoreController.onlineDbUsername(project, user);
+    return featurestoreJdbcConnectorController.createJdbcConnectorDTOForOnlineFeaturestore(dbUsername, featurestore,
+      project, user);
   }
 
 }
