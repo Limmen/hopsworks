@@ -329,7 +329,6 @@ public class FeaturestoreService {
   
   /**
    * Endpoint for uploading job-arguments to hdfs for featurestore utility jobs
-   * *
    *
    * @return HDFS path to the uploaded arguments
    */

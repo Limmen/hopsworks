@@ -19,15 +19,23 @@ package io.hops.hopsworks.common.dao.featurestore.storageconnector.jdbc;
 import com.google.common.base.Strings;
 import io.hops.hopsworks.common.dao.featurestore.Featurestore;
 import io.hops.hopsworks.common.dao.featurestore.storageconnector.FeaturestoreStorageConnectorDTO;
+import io.hops.hopsworks.common.dao.featurestore.storageconnector.FeaturestoreStorageConnectorType;
+import io.hops.hopsworks.common.dao.project.Project;
+import io.hops.hopsworks.common.dao.user.Users;
 import io.hops.hopsworks.common.featorestore.FeaturestoreConstants;
+import io.hops.hopsworks.common.security.secrets.SecretsController;
 import io.hops.hopsworks.common.util.Settings;
 import io.hops.hopsworks.exceptions.FeaturestoreException;
+import io.hops.hopsworks.exceptions.UserException;
 import io.hops.hopsworks.restutils.RESTCodes;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +48,9 @@ public class FeaturestoreJdbcConnectorController {
   private FeaturestoreJdbcConnectorFacade featurestoreJdbcConnectorFacade;
   @EJB
   private Settings settings;
+  @EJB
+  private SecretsController secretsController;
+  private static final Logger LOGGER = Logger.getLogger(FeaturestoreJdbcConnectorController.class.getName());
   
   
   /**
@@ -296,6 +307,43 @@ public class FeaturestoreJdbcConnectorController {
       throws FeaturestoreException {
     FeaturestoreJdbcConnector featurestoreJdbcConnector = verifyJdbcConnectorId(id, featurestore);
     return new FeaturestoreJdbcConnectorDTO(featurestoreJdbcConnector);
+  }
+  
+  
+  /**
+   * Create DTO for JDBC connector to the online feature store of a particular user and project
+   *
+   * @param dbUsername database username
+   * @param featurestore the featurestore entity
+   * @param project the project of the user
+   * @param user the user making the request
+   * @return a DTO of the JDBC connection to the online feature store of the given project and user
+   * @throws FeaturestoreException
+   */
+  @TransactionAttribute(TransactionAttributeType.NEVER)
+  public FeaturestoreJdbcConnectorDTO createJdbcConnectorDTOForOnlineFeaturestore(String dbUsername,
+    Featurestore featurestore, Project project, Users user) throws FeaturestoreException {
+    String hostname = settings.getHopsworksIp();
+    String password = "";
+    try {
+      password = secretsController.get(user, dbUsername).getPlaintext();
+    } catch (UserException e) {
+      LOGGER.log(Level.SEVERE, RESTCodes.FeaturestoreErrorCode.FEATURESTORE_ONLINE_SECRETS_ERROR.getMessage(), e);
+      throw new FeaturestoreException(RESTCodes.FeaturestoreErrorCode.FEATURESTORE_ONLINE_SECRETS_ERROR,
+        Level.WARNING, "Problem getting secrets for the JDBC connection to the online FS", e.getMessage(), e);
+    }
+    String port = "3306";
+    String connectionString =
+      "jdbc://" + dbUsername + ":" + password + "@" + hostname + ":" + port + "/" + project.getName();
+  
+    FeaturestoreJdbcConnectorDTO dto = new FeaturestoreJdbcConnectorDTO();
+    dto.setConnectionString(connectionString);
+    dto.setDescription("Online Featurestore JDBC connection string");
+    dto.setStorageConnectorType(FeaturestoreStorageConnectorType.JDBC);
+    dto.setName("Online Feature Store Storage Connector for user: " + user.getEmail() + " and project: "
+      + project.getName());
+    dto.setFeaturestoreId(featurestore.getId());
+    return dto;
   }
 
 }
